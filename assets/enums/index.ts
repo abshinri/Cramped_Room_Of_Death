@@ -26,3 +26,14 @@ export enum TILE_TYPE_ENUM {
   /** @member "地板" */
   FLOOR = "FLOOR",
 }
+
+/**
+ * 事件枚举
+ *
+ * @export
+ * @enum {number}
+ */
+export enum EVENT_ENUM {
+  /** @member "下一关" */
+  NEXT_LEVEL = "NEXT_LEVEL",
+}

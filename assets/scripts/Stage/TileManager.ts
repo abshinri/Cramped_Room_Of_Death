@@ -8,7 +8,7 @@ import {
   Layers,
 } from "cc";
 const { ccclass, property } = _decorator;
-import Utils from "./Utils";
+import Utils from "db://assets/scripts/Utils";
 
 // 砖块宽高
 export const TILE_WIDTH = 55;
