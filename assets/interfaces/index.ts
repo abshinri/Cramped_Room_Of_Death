@@ -1,4 +1,4 @@
-import { TILE_TYPE_ENUM } from "../enums/index";
+import { TILE_TYPE_ENUM, FSM_PARAMS_TYPE_ENUM } from "../enums/index";
 
 /**
  * 接口：地图块
@@ -37,4 +37,29 @@ export interface ILevel {
    * @memberof ILevel
    */
   map: Array<Array<ITile>>;
+}
+
+
+/**
+ * 接口：状态机参数值
+ *
+ * @export
+ * @interface IParamsValue
+ */
+export interface IParamsValue {
+  /**
+   * 参数值类型
+   *
+   * @type {FSM_PARAMS_TYPE_ENUM}
+   * @memberof IParamsValue
+   */
+  type: FSM_PARAMS_TYPE_ENUM;
+
+  /**
+   * 参数值, 可能是布尔值或者数字
+   *
+   * @type {(boolean|number)}
+   * @memberof IParamsValue
+   */
+  value: boolean|number;
 }

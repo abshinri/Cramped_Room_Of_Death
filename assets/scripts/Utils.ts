@@ -12,6 +12,7 @@ export default class Utils {
 
   /**
    * 创建一个Node,默认设置好常用的属性
+   * 通过这个方法创建的节点,默认会设置好锚点在左上角
    *
    * @static
    * @param {string} [name]

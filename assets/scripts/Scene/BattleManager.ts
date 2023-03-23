@@ -14,7 +14,6 @@ import EventManager from "../../runtime/EventManager";
 @ccclass("BattleManager")
 export class BattleManager extends Component {
   level: ILevel;
-  stage: Node;
   tileMap: Node;
 
   // #region 地图相关
@@ -22,26 +21,12 @@ export class BattleManager extends Component {
    * 生成地图
    *
    */
-  generateTileMap() {
+  async generateTileMap() {
     // 手动创建节点
-    // 舞台节点
-    this.stage = Utils.createNode("stage", this.node);
     // 地图节点
-    this.tileMap = Utils.createNode("tileMap", this.stage);
-
+    this.tileMap = Utils.createNode("tileMap", this.node);
     const mapManager = this.tileMap.addComponent(MapManager);
-    mapManager.init();
-  }
-
-  /**
-   * 居中地图
-   *
-   */
-  centerTileMap() {
-    const { mapRowCount, mapCol } = DataManager.instance;
-    const x = -(mapCol * 55) / 2;
-    const y = (mapRowCount * 55) / 2 + 80;
-    this.tileMap.setPosition(x, y);
+    await mapManager.init();
   }
 
   /**
@@ -69,28 +54,30 @@ export class BattleManager extends Component {
   generatePlayer() {
     // 手动创建节点
     // 玩家节点
-    const player = Utils.createNode("player", this.node);
+    const player = Utils.createNode("player", this.tileMap);
     // 玩家管理器
     const playerManager = player.addComponent(PlayerManager);
-    playerManager.init();  
+    playerManager.init();
   }
 
   // #endregion
 
-  initStage() {
+  async initStage() {
     const level = levels[`level_${DataManager.instance.levelIndex}`];
 
-    if (!level) return;
+    if (!level) {
+      console.error("关卡不存在");
+      console.error(level);
+      return;
+    }
     this.level = level;
 
     DataManager.instance.map = level.map;
     DataManager.instance.mapRowCount = level.map.length || 0;
     DataManager.instance.mapCol = level.map[0].length || 0;
 
-    this.generateTileMap();
-    this.centerTileMap();
-
-    this.generatePlayer();
+    await this.generateTileMap();
+    await this.generatePlayer();
   }
 
   onLoad() {
@@ -99,6 +86,7 @@ export class BattleManager extends Component {
   }
 
   start() {
+    console.log("BattleManager start");
     this.initStage();
     console.log(this);
     console.log(this.node);

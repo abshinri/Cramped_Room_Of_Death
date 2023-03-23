@@ -31,9 +31,61 @@ export enum TILE_TYPE_ENUM {
  * 事件枚举
  *
  * @export
- * @enum {number}
+ * @enum {string}
  */
 export enum EVENT_ENUM {
   /** @member "下一关" */
   NEXT_LEVEL = "NEXT_LEVEL",
+  /** @member "玩家操作" */
+  PLAYER_CONTROL = "PLAYER_CONTROL",
 }
+
+/**
+ * 控制枚举
+ *
+ * @export
+ * @enum {string}
+ */
+export enum CONTROL_ENUM {
+  /** @member "上" */
+  UP = "UP",
+  /** @member "下" */
+  DOWN = "DOWN",
+  /** @member "左" */
+  LEFT = "LEFT",
+  /** @member "右" */
+  RIGHT = "RIGHT",
+  /** @member "左转" */
+  TURN_LEFT = "TURN_LEFT",
+  /** @member "右转" */
+  TURN_RIGHT = "TURN_RIGHT",
+}
+
+/**
+ * 状态的参数类型枚举
+ *
+ * @export
+ * @enum {string}
+ */
+export enum FSM_PARAMS_TYPE_ENUM {
+  /** @member "为NUMBER类型时,接收数字" */
+  NUMBER = "NUMBER",
+  /** @member "为TRIGGER类型时,接收一个布尔值" */
+  TRIGGER = "TRIGGER",
+}
+
+/**
+ * 状态的名字枚举
+ *
+ * @export
+ * @enum {string}
+ */
+export enum FSM_PARAMS_NAME_ENUM {
+  /** @member "站立" */
+  IDLE = "IDLE",
+  /** @member "左转" */
+  TURN_LEFT = "TURN_LEFT",
+}
+
+
+

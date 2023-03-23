@@ -20,12 +20,25 @@ export const TILE_HEIGHT = 55;
 
 @ccclass("MapManager")
 export class MapManager extends Component {
+
+  /**
+   * 居中地图
+   *
+   */
+  centerTileMap() {
+    const { mapRowCount, mapCol } = DataManager.instance;
+    const x = -(mapCol * 55) / 2;
+    const y = (mapRowCount * 55) / 2 + 80;
+    this.node.setPosition(x, y);
+  }
+
+
   /**
    * 初始化砖块地图
    *
    */
   async init() {
-    // 解构出地图数据
+    // 加载地图资源
     const spriteFrames = await ResourceManager.instance.loadResDir(
       `texture/tile/tile`,
       SpriteFrame
@@ -37,7 +50,11 @@ export class MapManager extends Component {
     DataManager.instance.map.forEach((col, colIndex) => {
       col.forEach((tile, tileIndex) => {
         // 如果砖块类型或者砖块图片索引不存在，则不生成砖块
-        if (!tile.type || !tile.src) return;
+        if (!tile.type || !tile.src) {
+          console.error("如果砖块类型或者砖块图片索引不存在，则不生成砖块");
+          console.error(tile);
+          return;
+        }
         // 添加自定义组件-砖块管理器
         const tileManager = this.addComponent(TileManager);
 
@@ -68,5 +85,7 @@ export class MapManager extends Component {
         );
       });
     });
+
+    this.centerTileMap();
   }
 }

@@ -30,9 +30,10 @@ export default class EventManager extends Singleton {
     // 如果没有该事件列表名,则创建一个事件列表,并将事件和上下文放到数组里
     if (!this.eventMap.has(eventName)) {
       this.eventMap.set(eventName, [{ callback, ctx }]);
+    } else {
+      // 如果有该事件列表名,则直接将事件放到对应的事件列表里
+      this.eventMap.get(eventName).push({ callback, ctx });
     }
-    // 如果有该事件列表名,则直接将事件放到对应的事件列表里
-    this.eventMap.get(eventName).push({ callback, ctx });
   }
 
   /**

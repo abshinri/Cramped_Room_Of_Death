@@ -22,17 +22,22 @@ export class TileManager extends Component {
    */
   init(spriteFrame: SpriteFrame, poxX: number, poxY: number) {
     // 如果砖块类型或者砖块图片索引不存在，则不生成砖块
-    // 生成砖块
+    if (!spriteFrame) {
+      console.error("如果砖块类型或者砖块图片索引不存在，则不生成砖块");
+      console.error(spriteFrame);
+      return;
+    }
+
+    // 创建砖块节点,挂载到本节点上
     const tileNode = Utils.createNode("tile", this.node);
 
+    // 添加组件-Sprite
     const sprite = tileNode.addComponent(Sprite);
+    // 更换组件属性-Sprite的图片
     sprite.spriteFrame = spriteFrame;
 
     const ui_transform = tileNode.getComponent(UITransform);
     ui_transform.setContentSize(TILE_WIDTH, TILE_HEIGHT);
-
     tileNode.setPosition(poxX, poxY);
-
-    return tileNode;
   }
 }
