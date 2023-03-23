@@ -86,10 +86,7 @@ export class BattleManager extends Component {
   }
 
   start() {
-    console.log("BattleManager start");
     this.initStage();
-    console.log(this);
-    console.log(this.node);
   }
 
   update(deltaTime: number) {}

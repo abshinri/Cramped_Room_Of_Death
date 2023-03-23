@@ -29,6 +29,8 @@ export default class State {
 
   run() {
     this.pfsm.animationComponent.defaultClip = this.animationClip;
+    console.info(this.path + " state run() " + "pfsm animationComponent info");
+    console.log(this.pfsm.animationComponent);
     this.pfsm.animationComponent.play();
   }
 
@@ -44,7 +46,7 @@ export default class State {
     this.animationClip = new AnimationClip();
 
     const track = new animation.ObjectTrack(); // 创建一个对象轨道
-    
+
     this.animationClip.name = this.path; // 动画剪辑的名字为资源路径,可以确保唯一性
     track.path = new animation.TrackPath()
       .toComponent(Sprite)
@@ -68,6 +70,5 @@ export default class State {
 
     // 该动画为循环播放
     this.animationClip.wrapMode = this.wrapMode;
-
   }
 }

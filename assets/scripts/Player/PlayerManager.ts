@@ -92,8 +92,6 @@ export class PlayerManager extends Component {
     } else if (input === CONTROL_ENUM.TURN_RIGHT) {
       this.pfsm.setParams(FSM_PARAMS_NAME_ENUM.TURN_LEFT, true);
     }
-    console.log("move");
-    console.log(this.targetX, this.targetY);
   }
 
   // 让角色的坐标根据速度趋近于目标坐标,实现有动画的移动效果

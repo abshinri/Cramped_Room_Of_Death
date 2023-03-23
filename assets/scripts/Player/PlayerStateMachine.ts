@@ -55,12 +55,14 @@ export class PlayerStateMachine extends Component {
   setParams(paramsName: string, value: boolean | number) {
     if (this.params.has(paramsName)) {
       this.params.get(paramsName).value = value;
-      console.log("setParams");
+
+      console.info("setParams(paramsName,value) 传入的参数");
       console.log(paramsName, value);
+      console.info("setParams传入后,this.params的结果");
       console.log(this.params);
-      console.log(this.params.get(paramsName));
+      
       this.run();
-      // this.resetTrigger();
+      this.resetTrigger();
     }
   }
   /**
@@ -124,13 +126,10 @@ export class PlayerStateMachine extends Component {
    * 每次动画执行完后,应该执行一些操作,比如切换到另外一个状态
    */
   initAnimationEvent() {
-    console.log("initAnimationEvent");
     this.animationComponent.on(Animation.EventType.FINISHED, () => {
       const animationName = this.animationComponent?.defaultClip?.name;
       // 如果路径中包含一下数组中的字符串,就在动画执行完后进入idle状态
       const idleList = ["turn"];
-      console.log(Animation.EventType.FINISHED);
-      console.log(animationName);
       if (idleList.some((item) => animationName?.includes(item))) {
         this.setParams(FSM_PARAMS_NAME_ENUM.IDLE, true);
       }
@@ -143,10 +142,10 @@ export class PlayerStateMachine extends Component {
    *
    */
   run() {
+    console.info("pfsm run() 将判断的值");
+    console.log(this.currentState);
     switch (this.currentState) {
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT):
-        break;
-
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE):
         if (this.params.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT).value) {
           this.currentState = this.stateMachines.get(
@@ -167,7 +166,6 @@ export class PlayerStateMachine extends Component {
     this.initParams();
     this.initStateMachines();
     this.initAnimationEvent();
-    console.log(this.waitingList);
     await Promise.all(this.waitingList);
   }
 }
