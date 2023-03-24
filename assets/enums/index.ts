@@ -83,9 +83,56 @@ export enum FSM_PARAMS_TYPE_ENUM {
 export enum FSM_PARAMS_NAME_ENUM {
   /** @member "站立" */
   IDLE = "IDLE",
-  /** @member "左转" */
+  /** @member "执行左转中" */
   TURN_LEFT = "TURN_LEFT",
+  /** @member "方向" */
+  DIRECTION = "DIRECTION",
+}
+
+/**
+ * 角色方向枚举
+ *
+ * @export
+ * @enum {string}
+ */
+export enum CHARACTER_DIRECTION_ENUM {
+  /** @member "上" */
+  UP = "UP",
+  /** @member "下" */
+  DOWN = "DOWN",
+  /** @member "左" */
+  LEFT = "LEFT",
+  /** @member "右" */
+  RIGHT = "RIGHT",
 }
 
 
+/**
+ * 方向数字枚举
+ *
+ * @export
+ * @enum {number}
+ */
+export enum DIRECTION_NUMBER_ENUM {
+  /** @member "上" */
+  UP = 0,
+  /** @member "下" */
+  DOWN = 1,
+  /** @member "左" */
+  LEFT = 2,
+  /** @member "右" */
+  RIGHT = 3,
+}
 
+/**
+ * 角色状态枚举
+ *
+ * @export
+ * @enum {string}
+ */
+export enum CHARACTER_STATE_ENUM {
+  /** @member "站立" */
+  IDLE = "IDLE",
+  /** @member "左转" */
+  TURN_LEFT = "TURN_LEFT",
+}

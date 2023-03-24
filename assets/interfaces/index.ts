@@ -39,7 +39,6 @@ export interface ILevel {
   map: Array<Array<ITile>>;
 }
 
-
 /**
  * 接口：状态机参数值
  *

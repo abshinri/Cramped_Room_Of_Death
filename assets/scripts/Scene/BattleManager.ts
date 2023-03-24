@@ -66,8 +66,7 @@ export class BattleManager extends Component {
     const level = levels[`level_${DataManager.instance.levelIndex}`];
 
     if (!level) {
-      console.error("关卡不存在");
-      console.error(level);
+      Utils.error("关卡不存在", level);
       return;
     }
     this.level = level;

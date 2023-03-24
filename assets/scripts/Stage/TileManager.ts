@@ -21,10 +21,9 @@ export class TileManager extends Component {
    *
    */
   init(spriteFrame: SpriteFrame, poxX: number, poxY: number) {
-    // 如果砖块类型或者砖块图片索引不存在，则不生成砖块
+    // 如果spriteFrame不存在，则不生成砖块
     if (!spriteFrame) {
-      console.error("如果砖块类型或者砖块图片索引不存在，则不生成砖块");
-      console.error(spriteFrame);
+      Utils.error("spriteFrame不存在，则不生成砖块", spriteFrame);
       return;
     }
 

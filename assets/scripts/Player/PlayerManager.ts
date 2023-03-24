@@ -8,7 +8,14 @@ import {
   AnimationClip,
   SpriteFrame,
 } from "cc";
-import { CONTROL_ENUM, EVENT_ENUM, FSM_PARAMS_NAME_ENUM } from "../../enums";
+import {
+  CONTROL_ENUM,
+  EVENT_ENUM,
+  FSM_PARAMS_NAME_ENUM,
+  CHARACTER_DIRECTION_ENUM,
+  CHARACTER_STATE_ENUM,
+  DIRECTION_NUMBER_ENUM,
+} from "../../enums";
 import EventManager from "../../runtime/EventManager";
 import ResourceManager from "../../runtime/ResourceManager";
 import { TILE_WIDTH, TILE_HEIGHT } from "../Stage/MapManager";
@@ -24,58 +31,37 @@ export class PlayerManager extends Component {
   targetY: number = 0; // 主角的目标纵向位置,+为向上,-为向下
   private readonly speed = 1 / 10; // 主角移动速度
 
-  // 渲染角色
-  // async render() {
-  //   // 创建精灵
-  //   const sprite = this.addComponent(Sprite);
-  //   // 设置精灵的大小模式为自定义
-  //   sprite.sizeMode = Sprite.SizeMode.CUSTOM;
-  //   // 引入UITransform组件,缩放到砖块大小
-  //   const transform = this.getComponent(UITransform);
-  //   transform.setContentSize(TILE_WIDTH * 4, TILE_HEIGHT * 4);
+  private _direction: CHARACTER_DIRECTION_ENUM; // 主角的朝向
+  private _state: CHARACTER_STATE_ENUM; // 主角的状态
 
-  //   // 加载主角图片资源
-  //   const spriteFrames = await ResourceManager.instance.loadResDir(
-  //     "/texture/player/idle/top",
-  //     SpriteFrame
-  //   );
+  get direction() {
+    return this._direction;
+  }
 
-  //   // 添加动画组件
-  //   const animationComponent = this.addComponent(Animation);
+  /**
+   * 改变方向并改变当前角色的状态,并向状态机传递参数, 告知状态机当前状态的改变
+   *
+   */
+  set direction(value: CHARACTER_DIRECTION_ENUM) {
+    this._direction = value;
+    // 设置方向的状态级参数
+    this.pfsm.setParams(
+      FSM_PARAMS_NAME_ENUM.DIRECTION,
+      DIRECTION_NUMBER_ENUM[value]
+    );
+  }
+  get state() {
+    return this._state;
+  }
 
-  //   // 创建一个动画剪辑
-  //   // 以下代码改写于官方文档
-  //   // https://docs.cocos.com/creator/manual/zh/animation/use-animation-curve.html
-  //   const animationClip = new AnimationClip();
-
-  //   const track = new animation.ObjectTrack(); // 创建一个对象轨道
-  //   track.path = new animation.TrackPath()
-  //     .toComponent(Sprite)
-  //     .toProperty("spriteFrame"); // 轨道的路径指向精灵组件,属性为spriteFrame
-
-  //   // 整理动画资源为关键帧数组
-  //   const frames: Array<[number, SpriteFrame]> = spriteFrames.map(
-  //     (frame, index) => {
-  //       return [index * ANIMATION_SPEED, frame]; // 对应到动画编辑器里,这个数组的含义为 [时间表, 变量]
-  //     }
-  //   );
-
-  //   // 因为我们用的是ObjectTrack, 只有一个channel, 所以可以直接使用track.channel获取
-  //   // 添加关键帧
-  //   track.channel.curve.assignSorted(frames);
-
-  //   animationClip.duration = frames.length * ANIMATION_SPEED; // 动画关键帧总数*动画帧率=整个动画剪辑的周期时长
-
-  //   // 该动画为循环播放
-  //   animationClip.wrapMode = AnimationClip.WrapMode.Loop;
-
-  //   // 最后将轨道添加到动画剪辑以应用
-  //   animationClip.addTrack(track);
-
-  //   // 配置默认动画Clip
-  //   animationComponent.defaultClip = animationClip;
-  //   animationComponent.play(); // 加载时自动播放
-  // }
+  /**
+   * 改变当前角色的状态,并向状态机传递参数, 告知状态机当前状态的改变
+   *
+   */
+  set state(value: CHARACTER_STATE_ENUM) {
+    this._state = value;
+    this.pfsm.setParams(value, true);
+  }
 
   // 控制角色移动
   move(input: CONTROL_ENUM) {
@@ -88,9 +74,25 @@ export class PlayerManager extends Component {
     } else if (input === CONTROL_ENUM.RIGHT) {
       this.targetX += 1;
     } else if (input === CONTROL_ENUM.TURN_LEFT) {
-      this.pfsm.setParams(FSM_PARAMS_NAME_ENUM.TURN_LEFT, true);
+      if (this.direction === CHARACTER_DIRECTION_ENUM.UP) {
+        this.direction = CHARACTER_DIRECTION_ENUM.LEFT;
+      } else if (this.direction === CHARACTER_DIRECTION_ENUM.LEFT) {
+        this.direction = CHARACTER_DIRECTION_ENUM.DOWN;
+      } else if (this.direction === CHARACTER_DIRECTION_ENUM.DOWN) {
+        this.direction = CHARACTER_DIRECTION_ENUM.RIGHT;
+      } else if (this.direction === CHARACTER_DIRECTION_ENUM.RIGHT) {
+        this.direction = CHARACTER_DIRECTION_ENUM.UP;
+      }
     } else if (input === CONTROL_ENUM.TURN_RIGHT) {
-      this.pfsm.setParams(FSM_PARAMS_NAME_ENUM.TURN_LEFT, true);
+      if (this.direction === CHARACTER_DIRECTION_ENUM.UP) {
+        this.direction = CHARACTER_DIRECTION_ENUM.RIGHT;
+      } else if (this.direction === CHARACTER_DIRECTION_ENUM.LEFT) {
+        this.direction = CHARACTER_DIRECTION_ENUM.UP;
+      } else if (this.direction === CHARACTER_DIRECTION_ENUM.DOWN) {
+        this.direction = CHARACTER_DIRECTION_ENUM.LEFT;
+      } else if (this.direction === CHARACTER_DIRECTION_ENUM.RIGHT) {
+        this.direction = CHARACTER_DIRECTION_ENUM.DOWN;
+      }
     }
   }
 
@@ -137,10 +139,15 @@ export class PlayerManager extends Component {
     const transform = this.getComponent(UITransform);
     transform.setContentSize(TILE_WIDTH * 4, TILE_HEIGHT * 4);
 
+    // 加载玩家角色的状态机
     this.pfsm = this.addComponent(PlayerStateMachine);
     await this.pfsm.init();
-    this.pfsm.setParams(FSM_PARAMS_NAME_ENUM.IDLE, true);
-    // await this.render();
+
+    // 初始化状态为IDLE
+    this.state = CHARACTER_STATE_ENUM.IDLE;
+    // 初始化方向为UP
+    this.direction = CHARACTER_DIRECTION_ENUM.UP;
+
     EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.move, this);
   }
 }

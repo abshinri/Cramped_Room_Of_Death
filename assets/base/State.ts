@@ -1,6 +1,7 @@
 import { animation, AnimationClip, Sprite, SpriteFrame } from "cc";
 import ResourceManager from "../runtime/ResourceManager";
-import { PlayerStateMachine } from "../scripts/Player/PlayerStateMachine";
+import Utils, { CONSOLE_METHODS } from "../scripts/Utils";
+import { StateMachine } from "./StateMachine";
 const ANIMATION_SPEED = 1 / 8; // 动画单帧时长(每一帧的时间,单位秒)
 /**
  * 状态的基础类
@@ -15,12 +16,12 @@ export default class State {
   /**
    * 创建一个状态的实例对象
    * 创建的同时配置好私有属性
-   * @param {PlayerStateMachine} pfsm 当前的状态机
+   * @param {StateMachine} fsm 当前的状态机
    * @param {string} path 动画资源路径
    * @param {AnimationClip.WrapMode} [wrapMode = AnimationClip.WrapMode.Normal] 动画播放模式,默认只播放一次
    */
   constructor(
-    private pfsm: PlayerStateMachine,
+    private fsm: StateMachine,
     private path: string,
     private wrapMode: AnimationClip.WrapMode = AnimationClip.WrapMode.Normal
   ) {
@@ -28,17 +29,21 @@ export default class State {
   }
 
   run() {
-    this.pfsm.animationComponent.defaultClip = this.animationClip;
-    console.info(this.path + " state run() " + "pfsm animationComponent info");
-    console.log(this.pfsm.animationComponent);
-    this.pfsm.animationComponent.play();
+    this.fsm.animationComponent.defaultClip = this.animationClip;
+    this.fsm.animationComponent.play();
+
+    Utils.info(
+      "State run() this.path,this.fsm.animationComponent end",
+      this.path,
+      this.fsm.animationComponent
+    );
   }
 
   async init() {
     // 加载主角图片资源
     // 放到状态机里的执行列表里
     const promise = ResourceManager.instance.loadResDir(this.path, SpriteFrame);
-    this.pfsm.waitingList.push(promise);
+    this.fsm.waitingList.push(promise);
     const spriteFrames = await promise;
     // 创建一个动画剪辑
     // 以下代码改写于官方文档

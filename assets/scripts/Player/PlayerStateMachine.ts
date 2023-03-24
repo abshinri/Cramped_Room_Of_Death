@@ -7,81 +7,27 @@ import {
   SpriteFrame,
 } from "cc";
 import State from "../../base/State";
+import {
+  getInitParamsTrigger,
+  getInitParamsNumber,
+  StateMachine,
+} from "../../base/StateMachine";
 import { FSM_PARAMS_NAME_ENUM, FSM_PARAMS_TYPE_ENUM } from "../../enums";
-import { IParamsValue } from "../../interfaces";
+import Utils, { CONSOLE_METHODS } from "../Utils";
+import IdleSubStateMachine from "./IdleSubStateMachine";
+import TurnLeftSubStateMachine from "./TurnLeftSubStateMachine";
 
-import EventManager from "../../runtime/EventManager";
 const { ccclass, property } = _decorator;
 
 /**
- * 获取默认的Trigger类型的参数值
- * @returns {IParamsValue}
+ * 玩家角色的状态机
+ *
+ * @export
+ * @class PlayerStateMachine
+ * @extends {StateMachine}
  */
-export const getInitParamsTrigger = () => {
-  return {
-    type: FSM_PARAMS_TYPE_ENUM.TRIGGER,
-    value: false,
-  };
-};
-
 @ccclass("PlayerStateMachine")
-export class PlayerStateMachine extends Component {
-  private _currentState: State | null = null; // 当前状态
-  params: Map<string, IParamsValue> = new Map(); // 状态机参数
-  stateMachines: Map<string, State> = new Map(); // 所有的状态Map
-  animationComponent: Animation | null = null; // 动画组件
-  // 因为状态机改变的时候,会触发动画的切换,
-  // 动画的切换涉及资源的加载,是一个异步的过程,所以这些异步操作我们需要放到一个返回值为SpriteFrame数组的Promise队列中,依次执行
-  waitingList: Array<Promise<SpriteFrame[]>> = []; // 等待队列
-
-  /**
-   * 获取参数的值
-   *
-   * @param {string} paramsName
-   * @returns {*}
-   */
-  getParams(paramsName: string) {
-    if (this.params.has(paramsName)) {
-      return this.params.get(paramsName).value;
-    }
-  }
-
-  /**
-   * 设置参数的值
-   *
-   * @param {string} paramsName
-   * @param {(boolean | number)} value
-   */
-  setParams(paramsName: string, value: boolean | number) {
-    if (this.params.has(paramsName)) {
-      this.params.get(paramsName).value = value;
-
-      console.info("setParams(paramsName,value) 传入的参数");
-      console.log(paramsName, value);
-      console.info("setParams传入后,this.params的结果");
-      console.log(this.params);
-      
-      this.run();
-      this.resetTrigger();
-    }
-  }
-  /**
-   * 获取当前状态
-   *
-   */
-  get currentState() {
-    return this._currentState;
-  }
-
-  /**
-   * 设置当前状态
-   *
-   */
-  set currentState(state: State | null) {
-    this._currentState = state;
-    this._currentState.run();
-  }
-
+export class PlayerStateMachine extends StateMachine {
   /**
    * 初始化参数Map
    *
@@ -89,21 +35,7 @@ export class PlayerStateMachine extends Component {
   initParams() {
     this.params.set(FSM_PARAMS_NAME_ENUM.IDLE, getInitParamsTrigger());
     this.params.set(FSM_PARAMS_NAME_ENUM.TURN_LEFT, getInitParamsTrigger());
-  }
-
-  /**
-   * 重置所有的Trigger类型的参数
-   * 每次触发一个值为true的Trigger类型的参数后,都应该重置所有的Trigger类型的参数
-   * 否则,下一次触发的时候, 依次寻找第一个值为true的Trigger类型的参数,就会找到上一次触发的参数,导致状态机出现问题
-   *
-   */
-  resetTrigger() {
-    // 解构的时候使用_表示忽略该参数
-    for (const [_, value] of this.params) {
-      if (value.type === FSM_PARAMS_TYPE_ENUM.TRIGGER) {
-        value.value = false;
-      }
-    }
+    this.params.set(FSM_PARAMS_NAME_ENUM.DIRECTION, getInitParamsNumber());
   }
 
   /**
@@ -113,11 +45,19 @@ export class PlayerStateMachine extends Component {
   initStateMachines() {
     this.stateMachines.set(
       FSM_PARAMS_NAME_ENUM.IDLE,
-      new State(this, "/texture/player/idle/top", AnimationClip.WrapMode.Loop)
+      new IdleSubStateMachine(this)
     );
     this.stateMachines.set(
       FSM_PARAMS_NAME_ENUM.TURN_LEFT,
-      new State(this, "/texture/player/turnleft/top")
+      new TurnLeftSubStateMachine(this)
+    );
+    // this.stateMachines.set(
+    //   FSM_PARAMS_NAME_ENUM.DIRECTION,
+    //   new State(this, "/texture/player/turnleft/top")
+    // );
+    Utils.info(
+      "PlayerStateMachine initStateMachines() this.stateMachines end",
+      this.stateMachines
     );
   }
 
@@ -142,8 +82,11 @@ export class PlayerStateMachine extends Component {
    *
    */
   run() {
-    console.info("pfsm run() 将判断的值");
-    console.log(this.currentState);
+    Utils.info(
+      "PlayerStateMachine run() this.currentState start",
+      this.currentState
+    );
+
     switch (this.currentState) {
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT):
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE):
@@ -153,12 +96,20 @@ export class PlayerStateMachine extends Component {
           );
         } else if (this.params.get(FSM_PARAMS_NAME_ENUM.IDLE).value) {
           this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE);
+        } else {
+          // 如果没有状态可以转换,就保持当前状态
+          this.currentState = this.currentState;
         }
         break;
       default:
         this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE);
         break;
     }
+
+    Utils.info(
+      "PlayerStateMachine run() this.currentState end",
+      this.currentState
+    );
   }
 
   async init() {

@@ -20,7 +20,6 @@ export const TILE_HEIGHT = 55;
 
 @ccclass("MapManager")
 export class MapManager extends Component {
-
   /**
    * 居中地图
    *
@@ -31,7 +30,6 @@ export class MapManager extends Component {
     const y = (mapRowCount * 55) / 2 + 80;
     this.node.setPosition(x, y);
   }
-
 
   /**
    * 初始化砖块地图
@@ -51,8 +49,7 @@ export class MapManager extends Component {
       col.forEach((tile, tileIndex) => {
         // 如果砖块类型或者砖块图片索引不存在，则不生成砖块
         if (!tile.type || !tile.src) {
-          console.error("如果砖块类型或者砖块图片索引不存在，则不生成砖块");
-          console.error(tile);
+          Utils.error("如果砖块类型或者砖块图片索引不存在，则不生成砖块", tile);
           return;
         }
         // 添加自定义组件-砖块管理器
