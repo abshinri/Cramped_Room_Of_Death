@@ -1,7 +1,7 @@
 import { AnimationClip } from "cc";
 import State from "../../base/State";
 import { StateMachine } from "../../base/StateMachine";
-import { SubStateMachine } from "../../base/SubStateMachine";
+import DirectionSubStateMachine from "../../base/DirectionSubStateMachine";
 import {
   CHARACTER_DIRECTION_ENUM,
   DIRECTION_NUMBER_ENUM,
@@ -10,7 +10,7 @@ import {
 
 const BASE_URL = "/texture/player/idle";
 
-export default class IdleSubStateMachine extends SubStateMachine {
+export default class IdleSubStateMachine extends DirectionSubStateMachine {
   /**
    * 创建一个左转子状态机的实例
    * @param {StateMachine} fsm
@@ -36,13 +36,6 @@ export default class IdleSubStateMachine extends SubStateMachine {
     this.stateMachines.set(
       CHARACTER_DIRECTION_ENUM.RIGHT,
       new State(fsm, `${BASE_URL}/right`, AnimationClip.WrapMode.Loop)
-    );
-  }
-  run(): void {
-    // 获取当前的方向值, 此处初始化在PlayerManager中
-    const value = this.fsm.getParams(FSM_PARAMS_NAME_ENUM.DIRECTION);
-    this.currentState = this.stateMachines.get(
-      DIRECTION_NUMBER_ENUM[value as number]
     );
   }
 }
