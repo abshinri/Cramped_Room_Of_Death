@@ -18,6 +18,7 @@ import {
   DIRECTION_NUMBER_ENUM,
   ENTITY_TYPE_ENUM,
 } from "../../enums";
+import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
 import ResourceManager from "../../runtime/ResourceManager";
 import { TILE_WIDTH, TILE_HEIGHT } from "../Stage/MapManager";
@@ -26,9 +27,41 @@ const { ccclass, property } = _decorator;
 
 @ccclass("PlayerManager")
 export class PlayerManager extends EntityManager {
-  targetX: number = 0; // 主角的目标横向位置
-  targetY: number = 0; // 主角的目标纵向位置,+为向上,-为向下
+  targetX: number = 2; // 主角的目标横向位置
+  targetY: number = 8; // 主角的目标纵向位置,+为向上,-为向下
   private readonly speed = 1 / 10; // 主角移动速度
+
+  inputHandle(input: CONTROL_ENUM) {
+    if (this.willBlock(input)) return;
+    this.move(input);
+  }
+
+  /**
+   * 判断是否会被阻挡
+   *
+   * @param {CONTROL_ENUM} input
+   */
+  willBlock(input: CONTROL_ENUM) {
+    const { targetX: x, targetY: y, direction } = this;
+    const { tiles } = DataManager.instance;
+    if (input === CONTROL_ENUM.UP) {
+      const playerNextY = y - 1;
+      const weaponNextY = y - 2;
+      if (playerNextY < 0) return true; // 超出地图边界, 无法移动
+      const playerNextTile = tiles[x][playerNextY];
+      const weaponNextTile = tiles[x][weaponNextY];
+      if (
+        playerNextTile &&
+        playerNextTile.moveable &&
+        (!weaponNextTile || weaponNextTile.turnable)
+      ) {
+        // 无阻挡
+        return false;
+      } else {
+        return true;
+      }
+    }
+  }
 
   // 控制角色移动
   move(input: CONTROL_ENUM) {
@@ -100,12 +133,12 @@ export class PlayerManager extends EntityManager {
     await this.fsm.init();
 
     super.init({
-      x: 0,
-      y: 0,
+      x: 2,
+      y: 8,
       state: ENTITY_STATE_ENUM.IDLE,
       direction: ENTITY_DIRECTION_ENUM.UP,
       type: ENTITY_TYPE_ENUM.PLAYER,
-    })
+    });
 
     // 初始化状态为IDLE
     this.state = ENTITY_STATE_ENUM.IDLE;
@@ -113,6 +146,6 @@ export class PlayerManager extends EntityManager {
     this.direction = ENTITY_DIRECTION_ENUM.UP;
 
     // 当玩家按下操作按钮时, 触发move事件
-    EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.move, this);
+    EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle, this);
   }
 }

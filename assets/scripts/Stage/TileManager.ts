@@ -30,6 +30,7 @@ export class TileManager extends Component {
     poxX: number,
     poxY: number
   ) {
+    this.type = type;
     if (this.type.includes("WALL")) {
       this.moveable = false;
       this.turnable = false;
