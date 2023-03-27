@@ -1,4 +1,10 @@
-import { TILE_TYPE_ENUM, FSM_PARAMS_TYPE_ENUM } from "../enums/index";
+import {
+  TILE_TYPE_ENUM,
+  FSM_PARAMS_TYPE_ENUM,
+  ENTITY_TYPE_ENUM,
+  ENTITY_STATE_ENUM,
+  ENTITY_DIRECTION_ENUM,
+} from "../enums/index";
 
 /**
  * 接口：地图块
@@ -20,6 +26,20 @@ export interface ITile {
    * @memberof ITile
    */
   type: TILE_TYPE_ENUM | null;
+}
+
+/**
+ * 接口：实体基本属性
+ *
+ * @export
+ * @interface IEntity
+ */
+export interface IEntity {
+  x: number;
+  y: number;
+  type: ENTITY_TYPE_ENUM;
+  state: ENTITY_STATE_ENUM;
+  direction: ENTITY_DIRECTION_ENUM;
 }
 
 /**
@@ -60,5 +80,5 @@ export interface IParamsValue {
    * @type {(boolean|number)}
    * @memberof IParamsValue
    */
-  value: boolean|number;
+  value: boolean | number;
 }

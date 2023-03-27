@@ -1,5 +1,6 @@
 import Singleton from "../base/Singleton";
 import { ITile } from "../interfaces";
+import { TileManager } from "../scripts/Stage/TileManager";
 
 /**
  * 数据管理中心
@@ -19,6 +20,13 @@ export default class DataManager extends Singleton {
    * @type {Array<Array<ITile>>}
    */
   map: Array<Array<ITile>>;
+
+  /**
+   * 砖块信息
+   *
+   * @type {Array<Array<TileManager>>}
+   */
+  tiles: Array<Array<TileManager>>;
 
   /**
    * 当前的关卡行数

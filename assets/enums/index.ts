@@ -95,7 +95,7 @@ export enum FSM_PARAMS_NAME_ENUM {
  * @export
  * @enum {string}
  */
-export enum CHARACTER_DIRECTION_ENUM {
+export enum ENTITY_DIRECTION_ENUM {
   /** @member "上" */
   UP = "UP",
   /** @member "下" */
@@ -105,7 +105,6 @@ export enum CHARACTER_DIRECTION_ENUM {
   /** @member "右" */
   RIGHT = "RIGHT",
 }
-
 
 /**
  * 方向数字枚举
@@ -125,14 +124,29 @@ export enum DIRECTION_NUMBER_ENUM {
 }
 
 /**
+ * 角色的动作状态枚举
+ *
+ * @export
+ * @enum {string}
+ */
+export enum ENTITY_STATE_ENUM {
+  /** @member "站立" */
+  IDLE = "IDLE",
+  /** @member "左转" */
+  TURN_LEFT = "TURN_LEFT",
+  /** @member "右转" */
+  TURN_RIGHT = "TURN_RIGHT",
+}
+
+/**
  * 角色状态枚举
  *
  * @export
  * @enum {string}
  */
-export enum CHARACTER_STATE_ENUM {
-  /** @member "站立" */
-  IDLE = "IDLE",
-  /** @member "左转" */
-  TURN_LEFT = "TURN_LEFT",
+export enum ENTITY_TYPE_ENUM {
+  /** @member "玩家" */
+  PLAYER = "PLAYER",
+  /** @member "敌人" */
+  ENEMY = "ENEMY",
 }

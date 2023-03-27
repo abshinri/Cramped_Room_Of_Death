@@ -21,13 +21,18 @@ export default class State {
    * @param {AnimationClip.WrapMode} [wrapMode = AnimationClip.WrapMode.Normal] 动画播放模式,默认只播放一次
    */
   constructor(
-    private fsm: StateMachine,
+    private fsm: StateMachine, // 当前的状态机引用, 方便拿到实例的动画控制器组件
     private path: string,
     private wrapMode: AnimationClip.WrapMode = AnimationClip.WrapMode.Normal
   ) {
     this.init();
   }
 
+  
+  /**
+   * 状态的运行方法, 用于切换动画资源
+   *
+   */
   run() {
     this.fsm.animationComponent.defaultClip = this.animationClip;
     this.fsm.animationComponent.play();

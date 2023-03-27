@@ -51,10 +51,7 @@ export class PlayerStateMachine extends StateMachine {
       FSM_PARAMS_NAME_ENUM.TURN_LEFT,
       new TurnLeftSubStateMachine(this)
     );
-    // this.stateMachines.set(
-    //   FSM_PARAMS_NAME_ENUM.DIRECTION,
-    //   new State(this, "/texture/player/turnleft/top")
-    // );
+    
     Utils.info(
       "PlayerStateMachine initStateMachines() this.stateMachines end",
       this.stateMachines
@@ -91,9 +88,7 @@ export class PlayerStateMachine extends StateMachine {
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT):
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE):
         if (this.params.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT).value) {
-          this.currentState = this.stateMachines.get(
-            FSM_PARAMS_NAME_ENUM.TURN_LEFT
-          );
+          this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT);
         } else if (this.params.get(FSM_PARAMS_NAME_ENUM.IDLE).value) {
           this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE);
         } else {
