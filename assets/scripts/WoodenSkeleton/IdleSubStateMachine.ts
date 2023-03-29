@@ -1,19 +1,19 @@
 import { AnimationClip } from "cc";
 import State from "../../base/State";
-import { PlayerStateMachine } from "./PlayerStateMachine";
+import { WoodenSkeletonMachine } from "./WoodenSkeletonMachine";
 import DirectionSubStateMachine from "../../base/DirectionSubStateMachine";
 import {
   ENTITY_DIRECTION_ENUM,
 } from "../../enums";
 
-const BASE_URL = "/texture/player/idle";
+const BASE_URL = "/texture/woodenskeleton/idle";
 
 export default class IdleSubStateMachine extends DirectionSubStateMachine {
   /**
    * 创建一个左转子状态机的实例
-   * @param {PlayerStateMachine} fsm 玩家角色的状态机
+   * @param {WoodenSkeletonMachine} fsm 木骷髅角色的状态机
    */
-  constructor(fsm: PlayerStateMachine) {
+  constructor(fsm: WoodenSkeletonMachine) {
     super(fsm);
     // 配置站立时朝向的相关的状态
     this.stateMachines.set(

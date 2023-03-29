@@ -10,6 +10,7 @@ import { PlayerManager } from "../Player/PlayerManager";
 
 import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
+import { WoodenSkeletonManager } from "../WoodenSkeleton/WoodenSkeletonManager";
 
 @ccclass("BattleManager")
 export class BattleManager extends Component {
@@ -62,6 +63,15 @@ export class BattleManager extends Component {
 
   // #endregion
 
+  generateEnemy() {
+    // 手动创建节点
+    // 玩家节点
+    const entity = Utils.createNode("woodenSkeleton", this.tileMap);
+    // 玩家管理器
+    const woodenSkeletonManager = entity.addComponent(WoodenSkeletonManager);
+    woodenSkeletonManager.init();
+  }
+
   async initStage() {
     const level = levels[`level_${DataManager.instance.levelIndex}`];
 
@@ -77,6 +87,7 @@ export class BattleManager extends Component {
 
     await this.generateTileMap();
     await this.generatePlayer();
+    await this.generateEnemy();
   }
 
   onLoad() {

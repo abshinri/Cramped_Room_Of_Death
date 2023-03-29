@@ -6,11 +6,16 @@ import {
 } from "../../base/StateMachine";
 import { ENTITY_STATE_ENUM, FSM_PARAMS_NAME_ENUM } from "../../enums";
 import Utils from "../Utils";
+import BlockDownSubStateMachine from "./BlockDownSubStateMachine";
+import BlockLeftSubStateMachine from "./BlockLeftSubStateMachine";
+import BlockRightSubStateMachine from "./BlockRightSubStateMachine";
 import BlockTurnLeftSubStateMachine from "./BlockTurnLeftSubStateMachine";
+import BlockTurnRightSubStateMachine from "./BlockTurnRightSubStateMachine";
 import BlockUpSubStateMachine from "./BlockUpSubStateMachine";
 import IdleSubStateMachine from "./IdleSubStateMachine";
 import { PlayerManager } from "./PlayerManager";
 import TurnLeftSubStateMachine from "./TurnLeftSubStateMachine";
+import TurnRightSubStateMachine from "./TurnRightSubStateMachine";
 
 const { ccclass, property } = _decorator;
 
@@ -30,6 +35,7 @@ export class PlayerStateMachine extends StateMachine {
   initParams() {
     this.params.set(FSM_PARAMS_NAME_ENUM.IDLE, getInitParamsTrigger());
     this.params.set(FSM_PARAMS_NAME_ENUM.TURN_LEFT, getInitParamsTrigger());
+    this.params.set(FSM_PARAMS_NAME_ENUM.TURN_RIGHT, getInitParamsTrigger());
     this.params.set(FSM_PARAMS_NAME_ENUM.DIRECTION, getInitParamsNumber());
 
     /** 碰撞动画 */
@@ -38,6 +44,7 @@ export class PlayerStateMachine extends StateMachine {
     this.params.set(FSM_PARAMS_NAME_ENUM.BLOCK_LEFT, getInitParamsTrigger());
     this.params.set(FSM_PARAMS_NAME_ENUM.BLOCK_RIGHT, getInitParamsTrigger());
 
+    /** 旋转碰撞动画 */
     this.params.set(
       FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT,
       getInitParamsTrigger()
@@ -63,6 +70,11 @@ export class PlayerStateMachine extends StateMachine {
       FSM_PARAMS_NAME_ENUM.TURN_LEFT,
       new TurnLeftSubStateMachine(this)
     );
+    /** 右转动画状态机 */
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.TURN_RIGHT,
+      new TurnRightSubStateMachine(this)
+    );
 
     /** 碰撞动画状态机 */
     this.stateMachines.set(
@@ -70,12 +82,28 @@ export class PlayerStateMachine extends StateMachine {
       new BlockUpSubStateMachine(this)
     );
     this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.BLOCK_DOWN,
+      new BlockDownSubStateMachine(this)
+    );
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.BLOCK_LEFT,
+      new BlockLeftSubStateMachine(this)
+    );
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.BLOCK_RIGHT,
+      new BlockRightSubStateMachine(this)
+    );
+    this.stateMachines.set(
       FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT,
       new BlockTurnLeftSubStateMachine(this)
     );
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.BLOCK_TURN_RIGHT,
+      new BlockTurnRightSubStateMachine(this)
+    );
 
     Utils.info(
-      "PlayerStateMachine initStateMachines() this.stateMachines end",
+      "PlayerStateMachine.initStateMachines()-end this.stateMachines",
       this.stateMachines
     );
   }
@@ -87,7 +115,7 @@ export class PlayerStateMachine extends StateMachine {
   initAnimationEvent() {
     this.animationComponent.on(Animation.EventType.FINISHED, () => {
       const animationName = this.animationComponent?.defaultClip?.name;
-      // 如果路径中包含一下数组中的字符串,就在动画执行完后进入idle状态
+      // 如果路径中包含以下字符串,就在动画执行完后进入idle状态
       const idleList = ["block", "turn"];
       if (idleList.some((item) => animationName?.includes(item))) {
         // this.setParams(FSM_PARAMS_NAME_ENUM.IDLE, true); // 这样是直接修改动画状态机了,为了项目更加耦合,我们统一用状态去驱动状态机
@@ -101,33 +129,60 @@ export class PlayerStateMachine extends StateMachine {
 
   /**
    * 执行状态机
-   * 执行的时候,根据当前状态,逐个检查是否有可转换的状态,如果有,就转换到该状态
+   * 执行的时候,在状态参数池中寻找值为true的状态,然后执行对应的状态机
    *
    */
   run() {
     Utils.info(
-      "PlayerStateMachine run() this.currentState start",
+      "PlayerStateMachine.run()-start this.currentState",
       this.currentState
     );
 
     switch (this.currentState) {
-      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT):
-      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_UP):
-      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT):
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.TURN_RIGHT):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_UP):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_DOWN):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_LEFT):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_RIGHT):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_TURN_RIGHT):
         if (this.params.get(FSM_PARAMS_NAME_ENUM.BLOCK_UP).value) {
           this.currentState = this.stateMachines.get(
             FSM_PARAMS_NAME_ENUM.BLOCK_UP
           );
-        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT).value) {
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.BLOCK_DOWN).value) {
           this.currentState = this.stateMachines.get(
-            FSM_PARAMS_NAME_ENUM.TURN_LEFT
+            FSM_PARAMS_NAME_ENUM.BLOCK_DOWN
+          );
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.BLOCK_LEFT).value) {
+          this.currentState = this.stateMachines.get(
+            FSM_PARAMS_NAME_ENUM.BLOCK_LEFT
+          );
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.BLOCK_RIGHT).value) {
+          this.currentState = this.stateMachines.get(
+            FSM_PARAMS_NAME_ENUM.BLOCK_RIGHT
+          );
+        } else if (
+          this.params.get(FSM_PARAMS_NAME_ENUM.BLOCK_TURN_RIGHT).value
+        ) {
+          this.currentState = this.stateMachines.get(
+            FSM_PARAMS_NAME_ENUM.BLOCK_TURN_RIGHT
           );
         } else if (
           this.params.get(FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT).value
         ) {
           this.currentState = this.stateMachines.get(
             FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT
+          );
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT).value) {
+          this.currentState = this.stateMachines.get(
+            FSM_PARAMS_NAME_ENUM.TURN_LEFT
+          );
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.TURN_RIGHT).value) {
+          this.currentState = this.stateMachines.get(
+            FSM_PARAMS_NAME_ENUM.TURN_RIGHT
           );
         } else if (this.params.get(FSM_PARAMS_NAME_ENUM.IDLE).value) {
           this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE);
@@ -142,7 +197,7 @@ export class PlayerStateMachine extends StateMachine {
     }
 
     Utils.info(
-      "PlayerStateMachine run() this.currentState end",
+      "PlayerStateMachine.run()-end this.currentState",
       this.currentState
     );
   }

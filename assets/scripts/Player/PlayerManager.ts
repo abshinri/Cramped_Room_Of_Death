@@ -1,38 +1,38 @@
-import {
-  _decorator,
-  Component,
-  Sprite,
-  UITransform,
-  Animation,
-  animation,
-  AnimationClip,
-  SpriteFrame,
-} from "cc";
+import { Vec2, _decorator } from "cc";
 import { EntityManager } from "../../base/EntityManager";
 import {
   CONTROL_ENUM,
   EVENT_ENUM,
-  FSM_PARAMS_NAME_ENUM,
   ENTITY_DIRECTION_ENUM,
   ENTITY_STATE_ENUM,
-  DIRECTION_NUMBER_ENUM,
   ENTITY_TYPE_ENUM,
+  ENTITY_DIRECTION_TO_BLOCK_ENUM,
+  FSM_PARAMS_NAME_ENUM,
 } from "../../enums";
 import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
-import ResourceManager from "../../runtime/ResourceManager";
-import { TILE_WIDTH, TILE_HEIGHT } from "../Stage/MapManager";
+import { TileManager } from "../Stage/TileManager";
 import Utils from "../Utils";
 import { PlayerStateMachine } from "./PlayerStateMachine";
 const { ccclass, property } = _decorator;
 
 @ccclass("PlayerManager")
 export class PlayerManager extends EntityManager {
-  targetX: number = 2; // 主角的目标横向位置
-  targetY: number = 8; // 主角的目标纵向位置,+为向上,-为向下
+  /**
+   * 基类EntityManager包含的x,y是用于控制角色的位移动画的
+   * 在实际的数据建模中, 角色的位置是以角色的建模坐标target为准的
+   */
+  targetX: number = 2; // 主角的目标横向位置(实际为角色的建模坐标)
+  targetY: number = 8; // 主角的目标纵向位置(实际为角色的建模坐标),+为向上,-为向下
   private readonly speed = 1 / 10; // 主角移动速度
 
   inputHandle(input: CONTROL_ENUM) {
+    // 如果当前状态不是idle, 则不处理输入
+    if (
+      this.fsm.currentState !=
+      this.fsm.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE)
+    )
+      return;
     if (this.willBlock(input)) return;
     this.move(input);
   }
@@ -45,147 +45,184 @@ export class PlayerManager extends EntityManager {
   willBlock(input: CONTROL_ENUM) {
     // 提取方向,移动目标
     const { targetX: x, targetY: y, direction } = this;
+
     // 获取地图数据
     const { tiles } = DataManager.instance;
+
     /**
+     *  playerNextX, playerNextY: 玩家预计到达的坐标
+     *  weaponNextX, weaponNextY: 武器预计到达的坐标
+     *  x, y: 玩家的坐标, 取值于TargetX, TargetY
+     *  因为this.x,this.y是随着update实时更新的, 在动画衔接中操作直接会取到非整数值
      *  1.玩家下一步的砖块要存在, 玩家才能移动,
      *  2.玩家下一步的砖块要能踩上去, 玩家才能移动
      *  3.武器下一步的砖块不存在或者能转换方向, 玩家才能移动
      *  满足以上条件则表示玩家的移动不会被阻挡
      * */
+    /** 漫长的移动判断 */
+
+    /** 玩家当前位置 */
+    const playerCurrPos = new Vec2(x, y);
+    /** 武器当前位置 */
+    const weaponCurrPos = new Vec2(x, y);
+    /** 玩家接下来的位置 */
+    const playerNextPos = new Vec2(x, y);
+    /** 武器接下来的位置 */
+    const weaponNextPos = new Vec2(x, y);
+
+    /**  根据玩家面朝的方向, 提前计算武器的位置 */
+    if (this.direction === ENTITY_DIRECTION_ENUM.UP) {
+      /** 当玩家面朝上 */
+      weaponCurrPos.set(playerCurrPos.x, playerCurrPos.y - 1);
+    } else if (this.direction === ENTITY_DIRECTION_ENUM.DOWN) {
+      /** 当玩家面朝下 */
+      weaponCurrPos.set(playerCurrPos.x, playerCurrPos.y + 1);
+    } else if (this.direction === ENTITY_DIRECTION_ENUM.LEFT) {
+      /** 当玩家面朝左 */
+      weaponCurrPos.set(playerCurrPos.x - 1, playerCurrPos.y);
+    } else if (this.direction === ENTITY_DIRECTION_ENUM.RIGHT) {
+      /** 当玩家面朝右 */
+      weaponCurrPos.set(playerCurrPos.x + 1, playerCurrPos.y);
+    }
+
     if (input === CONTROL_ENUM.UP) {
       /** 向上移动 */
-      const playerNextY = y - 1;
-      const weaponNextY = y - 2;
-      if (playerNextY < 0) return true; // 上方超出地图边界, 无法移动
-      const playerNextTile = tiles[x][playerNextY]; // 玩家上方的砖块
-      const weaponNextTile = tiles[x][weaponNextY]; // 武器上方的砖块
-
-      if (
-        playerNextTile &&
-        playerNextTile.moveable &&
-        (!weaponNextTile || weaponNextTile.turnable)
-      ) {
-        return false;
-      } else {
-        this.state = ENTITY_STATE_ENUM.BLOCK_UP;
-        return true;
-      }
+      const moveVec = new Vec2(0, -1);
+      playerNextPos.add(moveVec);
+      if (playerNextPos.y < 0) return true; // 上方超出地图边界, 无法移动
+      weaponNextPos.set(weaponCurrPos).add(moveVec);
     } else if (input === CONTROL_ENUM.DOWN) {
-    /** 向下移动 */
-      const playerNextY = y + 1;
-      const weaponNextY = y + 2;
-      if (playerNextY > tiles[0].length) return true; // 下方超出地图边界, 无法移动
-      const playerNextTile = tiles[x][playerNextY]; // 玩家下方的砖块
-      const weaponNextTile = tiles[x][weaponNextY]; // 武器下方的砖块
-
-      if (
-        playerNextTile &&
-        playerNextTile.moveable &&
-        (!weaponNextTile || weaponNextTile.turnable)
-      ) {
-        return false;
-      } else {
-        this.state = ENTITY_STATE_ENUM.BLOCK_DOWN;
-        return true;
-      }
+      /** 向下移动 */
+      const moveVec = new Vec2(0, 1);
+      playerNextPos.add(moveVec);
+      if (playerNextPos.y > tiles[0]?.length) return true; // 下方超出地图边界, 无法移动
+      weaponNextPos.set(weaponCurrPos).add(moveVec);
     } else if (input === CONTROL_ENUM.LEFT) {
-    /** 向左移动 */
-      const playerNextX = x - 1;
-      const weaponNextX = x - 2;
-      if (playerNextX < 0) return true; // 左方超出地图边界, 无法移动
-      const playerNextTile = tiles[playerNextX][y]; // 玩家左方的砖块
-      const weaponNextTile = tiles[weaponNextX][y]; // 武器左方的砖块
-
-      if (
-        playerNextTile &&
-        playerNextTile.moveable &&
-        (!weaponNextTile || weaponNextTile.turnable)
-      ) {
-        return false;
-      } else {
-        this.state = ENTITY_STATE_ENUM.BLOCK_LEFT;
-        return true;
-      }
+      /** 向左移动 */
+      const moveVec = new Vec2(-1, 0);
+      playerNextPos.add(moveVec);
+      if (playerNextPos.x < 0) return true; // 左方超出地图边界, 无法移动
+      weaponNextPos.set(weaponCurrPos).add(moveVec);
     } else if (input === CONTROL_ENUM.RIGHT) {
       /** 向右移动 */
-        const playerNextX = x + 1;
-        const weaponNextX = x + 2;
-        if (playerNextX > tiles[0].length) return true; // 右方超出地图边界, 无法移动
-        const playerNextTile = tiles[playerNextX][y]; // 玩家右方的砖块
-        const weaponNextTile = tiles[weaponNextX][y]; // 武器右方的砖块
-  
-        if (
-          playerNextTile &&
-          playerNextTile.moveable &&
-          (!weaponNextTile || weaponNextTile.turnable)
-        ) {
-          return false;
-        } else {
-          this.state = ENTITY_STATE_ENUM.BLOCK_RIGHT;
-          return true;
-        }
-      } else if (input === CONTROL_ENUM.TURN_LEFT) {
+      const moveVec = new Vec2(1, 0);
+      playerNextPos.add(moveVec);
+      if (playerNextPos.x > tiles.length) return true; // 右方超出地图边界, 无法移动
+      weaponNextPos.set(weaponCurrPos).add(moveVec);
+    } else if (input === CONTROL_ENUM.TURN_LEFT) {
       /**
        * 通过角色的侧方(转向的一边),前方和侧前方的砖块来判断是否能转向
        * 如果前方,侧方和侧前方的砖块都都是可以让武器穿过的,则表示可以转向
        * 转向时,想一想,武器的位置是怎么变化的, 侧前的砖块在哪
        * 因为砖块时数组包数组的形式, 数组下标为从左到右从上到下增加
        * 所以以主人公为中心, 四个象限左上为x-,y- ,右下为x+,y+
+       * 转向时,主角中心点不变, 所以依旧取用主角的targetX,targetY也没问题
+       * moveVec取值就是单纯以主角的面朝方向为基准, 对应的武器x,y轴的增量
        * */
       /** 左转 */
-      let weaponX: number;
-      let weaponY: number;
+      const moveVec: Vec2 = new Vec2(0, 0);
       if (direction === ENTITY_DIRECTION_ENUM.UP) {
-        weaponX = x - 1;
-        weaponY = y - 1;
+        moveVec.set(-1, -1);
       } else if (direction === ENTITY_DIRECTION_ENUM.LEFT) {
-        weaponX = x - 1;
-        weaponY = y + 1;
+        moveVec.set(-1, 1);
       } else if (direction === ENTITY_DIRECTION_ENUM.DOWN) {
-        weaponX = x + 1;
-        weaponY = y + 1;
+        moveVec.set(1, 1);
       } else if (direction === ENTITY_DIRECTION_ENUM.RIGHT) {
-        weaponX = x + 1;
-        weaponY = y - 1;
+        moveVec.set(1, -1);
       }
-      if (
-        (!tiles[x][weaponY] || tiles[x][weaponY].turnable) &&
-        (!tiles[weaponX][weaponY] || tiles[weaponX][weaponY].turnable) &&
-        (!tiles[weaponX][y] || tiles[weaponX][y].turnable)
-      ) {
-        return false;
-      } else {
-        this.state = ENTITY_STATE_ENUM.BLOCK_TURN_LEFT;
-        return true;
-      }
+      weaponNextPos.set(playerCurrPos).add(moveVec);
     } else if (input === CONTROL_ENUM.TURN_RIGHT) {
       /** 右转 */
-      let weaponX: number;
-      let weaponY: number;
+      const moveVec: Vec2 = new Vec2(0, 0);
       if (direction === ENTITY_DIRECTION_ENUM.UP) {
-        weaponX = x + 1;
-        weaponY = y - 1;
+        moveVec.set(1, -1);
       } else if (direction === ENTITY_DIRECTION_ENUM.LEFT) {
-        weaponX = x - 1;
-        weaponY = y - 1;
+        moveVec.set(-1, -1);
       } else if (direction === ENTITY_DIRECTION_ENUM.DOWN) {
-        weaponX = x - 1;
-        weaponY = y + 1;
+        moveVec.set(-1, 1);
       } else if (direction === ENTITY_DIRECTION_ENUM.RIGHT) {
-        weaponX = x + 1;
-        weaponY = y + 1;
+        moveVec.set(1, 1);
       }
-      if (
-        (!tiles[x][weaponY] || tiles[x][weaponY].turnable) &&
-        (!tiles[weaponX][weaponY] || tiles[weaponX][weaponY].turnable) &&
-        (!tiles[weaponX][y] || tiles[weaponX][y].turnable)
-      ) {
-        return false;
-      } else {
-        this.state = ENTITY_STATE_ENUM.BLOCK_TURN_RIGHT;
-        return true;
-      }
+      weaponNextPos.set(playerCurrPos).add(moveVec);
+    }
+
+    if (
+      input === CONTROL_ENUM.UP ||
+      CONTROL_ENUM.DOWN ||
+      CONTROL_ENUM.LEFT ||
+      CONTROL_ENUM.RIGHT
+    ) {
+      /** 平移独有的处理 */
+      return this.canMoveToTargetPosByTile(
+        this.getTileByPos(playerNextPos),
+        this.getTileByPos(weaponNextPos)
+      );
+    } else if (input === CONTROL_ENUM.TURN_LEFT || CONTROL_ENUM.TURN_RIGHT) {
+      /** 转向独有的处理 */
+      return this.canTurnToTargetPosByTile(playerCurrPos, weaponNextPos, input);
+    }
+  }
+
+  /**
+   * 实时获取砖块信息
+   *
+   * @param {Vec2} pos
+   * @returns {TileManager}
+   */
+  getTileByPos(pos: Vec2): TileManager {
+    return DataManager.instance.tiles[pos.x]?.[pos.y];
+  }
+
+  /**
+   * 根据地形判断角色是否能够移动到目标位置
+   *
+   * @param {TileManager} playerNextTile 玩家接下来的位置的砖块信息
+   * @param {TileManager} weaponNextTile 武器接下来的位置的砖块信息
+   * @returns {boolean}
+   */
+  canMoveToTargetPosByTile(
+    playerNextTile: TileManager,
+    weaponNextTile: TileManager
+  ): boolean {
+    if (
+      playerNextTile &&
+      playerNextTile.moveable &&
+      (!weaponNextTile || weaponNextTile.turnable)
+    ) {
+      return false;
+    } else {
+      this.state = ENTITY_DIRECTION_TO_BLOCK_ENUM[this.direction];
+      return true;
+    }
+  }
+
+  /**
+   * 根据地形判断角色是否能够转动到目标位置
+   *
+   * @param {Vec2} playerCurrPos 玩家的位置信息
+   * @param {Vec2} weaponNextPos 武器接下来的位置信息
+   * @param {CONTROL_ENUM} input 输入
+   * @returns {boolean}
+   */
+  canTurnToTargetPosByTile(
+    playerCurrPos: Vec2,
+    weaponNextPos: Vec2,
+    input: CONTROL_ENUM
+  ): boolean {
+    if (
+      (!DataManager.instance.tiles[playerCurrPos.x][weaponNextPos.y] ||
+        DataManager.instance.tiles[playerCurrPos.x][weaponNextPos.y]
+          .turnable) &&
+      (!DataManager.instance.tiles[weaponNextPos.x][weaponNextPos.y] ||
+        DataManager.instance.tiles[weaponNextPos.x][weaponNextPos.y]
+          .turnable) &&
+      (!DataManager.instance.tiles[weaponNextPos.x][playerCurrPos.y] ||
+        DataManager.instance.tiles[weaponNextPos.x][playerCurrPos.y].turnable)
+    ) {
+      return false;
+    } else {
+      this.state = ENTITY_DIRECTION_TO_BLOCK_ENUM[input];
+      return true;
     }
   }
 
@@ -276,7 +313,7 @@ export class PlayerManager extends EntityManager {
     EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle, this);
 
     Utils.info(
-      "PlayerManager init() DataManager.instance.tiles end",
+      "PlayerManager.init()-end DataManager.instance.tiles",
       DataManager.instance.tiles
     );
   }

@@ -1,11 +1,4 @@
-import {
-  _decorator,
-  Component,
-  Event,
-  AnimationClip,
-  Animation,
-  SpriteFrame,
-} from "cc";
+import { _decorator } from "cc";
 
 import State from "db://assets/base/State";
 import { StateMachine } from "./StateMachine";

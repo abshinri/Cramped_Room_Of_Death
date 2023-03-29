@@ -42,6 +42,7 @@ export class MapManager extends Component {
       SpriteFrame
     );
 
+    // 砖块属性信息
     DataManager.instance.tiles = [];
 
     // 遍历地图上的每一个砖块
@@ -93,5 +94,14 @@ export class MapManager extends Component {
     });
 
     this.centerTileMap();
+    Utils.info(
+      "MapManager.init()-end DataManager.instance.tiles",
+      DataManager.instance.tiles
+    );
+
+    Utils.info(
+      "MapManager.init()-end DataManager.instance.map",
+      DataManager.instance.map
+    );
   }
 }

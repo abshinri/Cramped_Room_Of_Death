@@ -1,4 +1,3 @@
-import { AnimationClip } from "cc";
 import DirectionSubStateMachine from "../../base/DirectionSubStateMachine";
 import State from "../../base/State";
 import { PlayerStateMachine } from "./PlayerStateMachine";

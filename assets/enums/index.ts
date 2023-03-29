@@ -85,6 +85,9 @@ export enum FSM_PARAMS_NAME_ENUM {
   IDLE = "IDLE",
   /** @member "执行左转中" */
   TURN_LEFT = "TURN_LEFT",
+  /** @member "执行右转中" */
+  TURN_RIGHT = "TURN_RIGHT",
+
   /** @member "人物朝向" */
   DIRECTION = "DIRECTION",
 
@@ -96,7 +99,7 @@ export enum FSM_PARAMS_NAME_ENUM {
   BLOCK_LEFT = "BLOCK_LEFT",
   /** @member "朝右的碰撞" */
   BLOCK_RIGHT = "BLOCK_RIGHT",
-  
+
   /** @member "左转的碰撞" */
   BLOCK_TURN_LEFT = "BLOCK_TURN_LEFT",
   /** @member "右转的碰撞" */
@@ -118,6 +121,28 @@ export enum ENTITY_DIRECTION_ENUM {
   LEFT = "LEFT",
   /** @member "右" */
   RIGHT = "RIGHT",
+}
+
+/**
+ * 角色方向转碰撞的枚举
+ *
+ * @export
+ * @enum {string}
+ */
+export enum ENTITY_DIRECTION_TO_BLOCK_ENUM {
+  /** @member "朝上的碰撞" */
+  UP = "BLOCK_UP",
+  /** @member "朝下的碰撞" */
+  DOWN = "BLOCK_DOWN",
+  /** @member "朝左的碰撞" */
+  LEFT = "BLOCK_LEFT",
+  /** @member "朝右的碰撞" */
+  RIGHT = "BLOCK_RIGHT",
+
+  /** @member "左转的碰撞" */
+  TURN_LEFT = "BLOCK_TURN_LEFT",
+  /** @member "右转的碰撞" */
+  TURN_RIGHT = "BLOCK_TURN_RIGHT",
 }
 
 /**
@@ -159,7 +184,7 @@ export enum ENTITY_STATE_ENUM {
   BLOCK_LEFT = "BLOCK_LEFT",
   /** @member "朝右的碰撞" */
   BLOCK_RIGHT = "BLOCK_RIGHT",
-  
+
   /** @member "左转的碰撞" */
   BLOCK_TURN_LEFT = "BLOCK_TURN_LEFT",
   /** @member "右转的碰撞" */
@@ -167,7 +192,7 @@ export enum ENTITY_STATE_ENUM {
 }
 
 /**
- * 角色状态枚举
+ * 角色类型枚举
  *
  * @export
  * @enum {string}

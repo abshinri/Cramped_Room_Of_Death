@@ -1,12 +1,9 @@
-import { AnimationClip } from "cc";
 import DirectionSubStateMachine from "../../base/DirectionSubStateMachine";
 import State from "../../base/State";
 import { PlayerStateMachine } from "./PlayerStateMachine";
 
 import {
   ENTITY_DIRECTION_ENUM,
-  DIRECTION_NUMBER_ENUM,
-  FSM_PARAMS_NAME_ENUM,
 } from "../../enums";
 
 const BASE_URL = "/texture/player/turnleft";

@@ -1,6 +1,6 @@
 import { animation, AnimationClip, Sprite, SpriteFrame } from "cc";
 import ResourceManager from "../runtime/ResourceManager";
-import Utils, { CONSOLE_METHODS } from "../scripts/Utils";
+import Utils from "../scripts/Utils";
 import { StateMachine } from "./StateMachine";
 const ANIMATION_SPEED = 1 / 8; // 动画单帧时长(每一帧的时间,单位秒)
 /**
@@ -28,7 +28,6 @@ export default class State {
     this.init();
   }
 
-  
   /**
    * 状态的运行方法, 用于切换动画资源
    *
@@ -38,14 +37,14 @@ export default class State {
     this.fsm.animationComponent.play();
 
     Utils.info(
-      "State run() this.path,this.fsm.animationComponent end",
+      "State.run()-end this.path,this.fsm.animationComponent ",
       this.path,
       this.fsm.animationComponent
     );
   }
 
   async init() {
-    // 加载主角图片资源
+    // 加载图片资源
     // 放到状态机里的执行列表里
     const promise = ResourceManager.instance.loadResDir(this.path, SpriteFrame);
     this.fsm.waitingList.push(promise);
@@ -63,11 +62,12 @@ export default class State {
       .toProperty("spriteFrame"); // 轨道的路径指向精灵组件,属性为spriteFrame
 
     // 整理动画资源为关键帧数组
-    const frames: Array<[number, SpriteFrame]> = spriteFrames.map(
-      (frame, index) => {
-        return [index * ANIMATION_SPEED, frame]; // 对应到动画编辑器里,这个数组的含义为 [时间表, 变量]
-      }
-    );
+    // 因为资源的加载为异步,可能拿到的资源顺序不一致,所以需要对资源进行排序
+    const frames: Array<[number, SpriteFrame]> = Utils.sortSpriteFrames(
+      spriteFrames
+    ).map((frame, index) => {
+      return [index * ANIMATION_SPEED, frame]; // 对应到动画编辑器里,这个数组的含义为 [时间表, 变量]
+    });
 
     // 因为我们用的是ObjectTrack, 只有一个channel, 所以可以直接使用track.channel获取
     // 添加关键帧

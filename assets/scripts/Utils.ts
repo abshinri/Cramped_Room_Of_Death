@@ -1,4 +1,12 @@
-import { resources, Asset, Constructor, Node, Layers, UITransform } from "cc";
+import {
+  resources,
+  Asset,
+  Constructor,
+  Node,
+  Layers,
+  UITransform,
+  SpriteFrame,
+} from "cc";
 export enum CONSOLE_METHODS {
   LOG = "log",
   INFO = "info",
@@ -11,6 +19,11 @@ export enum CONSOLE_METHODS_COLORS {
   warn = "#e6a23c",
   error = "#f56c6c",
 }
+
+const INDEX_REG = /\((\d+)\)/;
+
+const getNumberWithinString = (str: string) =>
+  parseInt(str.match(INDEX_REG)?.[1] || "0");
 
 // 一些工具方法
 export default class Utils {
@@ -80,5 +93,12 @@ export default class Utils {
 
   static error(title: string, ...args: any[]) {
     this.console(CONSOLE_METHODS.ERROR, title, ...args);
+  }
+
+  // 给SpriteFrame排序
+  static sortSpriteFrames(spriteFrames: SpriteFrame[]) {
+    return spriteFrames.sort(
+      (a, b) => getNumberWithinString(a.name) - getNumberWithinString(b.name)
+    );
   }
 }

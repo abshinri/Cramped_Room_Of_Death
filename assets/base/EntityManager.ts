@@ -16,6 +16,7 @@ import {
   ENTITY_STATE_ENUM,
   DIRECTION_NUMBER_ENUM,
   ENTITY_TYPE_ENUM,
+  ENTITY_DIRECTION_TO_BLOCK_ENUM,
 } from "db://assets/enums";
 import { TILE_WIDTH, TILE_HEIGHT } from "db://assets/scripts/Stage/MapManager";
 import { StateMachine } from "db://assets/base/StateMachine";
@@ -29,7 +30,7 @@ export class EntityManager extends Component {
   y: number = 0; // 实体的纵向位置
 
   private _direction: ENTITY_DIRECTION_ENUM; // 实体的朝向
-  private _state: ENTITY_STATE_ENUM; // 实体的状态
+  private _state: ENTITY_STATE_ENUM | ENTITY_DIRECTION_TO_BLOCK_ENUM; // 实体的状态
   private type: ENTITY_TYPE_ENUM; // 实体的类型
 
   get direction() {
@@ -56,12 +57,17 @@ export class EntityManager extends Component {
    * 改变当前角色的状态,并向状态机传递参数, 告知状态机当前状态的改变
    *
    */
-  set state(value: ENTITY_STATE_ENUM) {
+  set state(value: ENTITY_STATE_ENUM | ENTITY_DIRECTION_TO_BLOCK_ENUM) {
     this._state = value;
     this.fsm.setParams(value, true);
   }
 
   update(dt: number) {
+    /** 更新实体的坐标
+     *  本游戏的地图信息为二维数组, 建模基准为右下坐标下标数字增加, 左上坐标下标数字减少
+     *  但是cocos的坐标系规则右上坐标下标数字增加, 左下坐标下标数字减少
+     *  所以设置位置需要对y轴坐标进行取反
+     */
     this.node.setPosition(
       this.x * TILE_WIDTH - TILE_WIDTH * 1.5,
       -this.y * TILE_HEIGHT + TILE_HEIGHT * 1.5

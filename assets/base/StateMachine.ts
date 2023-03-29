@@ -1,8 +1,6 @@
 import {
   _decorator,
   Component,
-  Event,
-  AnimationClip,
   Animation,
   SpriteFrame,
 } from "cc";
@@ -10,11 +8,10 @@ import {
 import State from "db://assets/base/State";
 
 import {
-  FSM_PARAMS_NAME_ENUM,
   FSM_PARAMS_TYPE_ENUM,
 } from "db://assets/enums/index";
 import { IParamsValue } from "db://assets/interfaces/index";
-import Utils, { CONSOLE_METHODS } from "../scripts/Utils";
+import Utils from "../scripts/Utils";
 import { SubStateMachine } from "./SubStateMachine";
 
 const { ccclass, property } = _decorator;
@@ -84,9 +81,8 @@ export abstract class StateMachine extends Component {
     if (this.params.has(paramsName)) {
       this.params.get(paramsName).value = value;
 
-      Utils.console(
-        CONSOLE_METHODS.INFO,
-        "StateMachine setParams() paramsName,value,this.params start",
+      Utils.info(
+        "StateMachine.setParams()-start paramsName,value,this.params",
         paramsName,
         value,
         this.params

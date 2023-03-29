@@ -6,16 +6,16 @@ import {
   ENTITY_DIRECTION_ENUM,
 } from "../../enums";
 
-const BASE_URL = "/texture/player/blockturnleft";
+const BASE_URL = "/texture/player/blockturnright";
 
-export default class BlockTurnLeftSubStateMachine extends DirectionSubStateMachine {
+export default class BlockTurnRightSubStateMachine extends DirectionSubStateMachine {
   /**
-   * 创建一个向左旋转时撞墙的动画子状态机的实例
+   * 创建一个向右旋转时撞墙的动画子状态机的实例
    * @param {PlayerStateMachine} fsm
    */
   constructor(fsm: PlayerStateMachine) {
     super(fsm);
-    // 配置向左旋转时撞墙的动画相关的状态
+    // 配置向右旋转时撞墙的动画相关的状态
     this.stateMachines.set(
       ENTITY_DIRECTION_ENUM.UP,
       new State(fsm, `${BASE_URL}/top`)
