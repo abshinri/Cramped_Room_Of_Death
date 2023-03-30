@@ -1,15 +1,8 @@
-import {
-  _decorator,
-  Component,
-  Animation,
-  SpriteFrame,
-} from "cc";
+import { _decorator, Component, Animation, SpriteFrame } from "cc";
 
 import State from "db://assets/base/State";
 
-import {
-  FSM_PARAMS_TYPE_ENUM,
-} from "db://assets/enums/index";
+import { FSM_PARAMS_TYPE_ENUM } from "db://assets/enums/index";
 import { IParamsValue } from "db://assets/interfaces/index";
 import Utils from "../scripts/Utils";
 import { SubStateMachine } from "./SubStateMachine";
@@ -70,7 +63,7 @@ export abstract class StateMachine extends Component {
 
   /**
    * 设置参数的值
-   * 每次设置后,会找 状态Map 里是否有类型为Trigger值为true的 状态 
+   * 每次设置后,会找 状态Map 里是否有类型为Trigger值为true的 状态
    * 然后会在Run里面去执行具体的状态变化操作
    * 最后reset所有的Trigger类型的参数值为false
    *

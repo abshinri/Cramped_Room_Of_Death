@@ -6,12 +6,15 @@ import {
 } from "../../base/StateMachine";
 import { ENTITY_STATE_ENUM, FSM_PARAMS_NAME_ENUM } from "../../enums";
 import Utils from "../Utils";
+import AttackSubStateMachine from "./AttackSubStateMachine";
 import BlockDownSubStateMachine from "./BlockDownSubStateMachine";
 import BlockLeftSubStateMachine from "./BlockLeftSubStateMachine";
 import BlockRightSubStateMachine from "./BlockRightSubStateMachine";
 import BlockTurnLeftSubStateMachine from "./BlockTurnLeftSubStateMachine";
 import BlockTurnRightSubStateMachine from "./BlockTurnRightSubStateMachine";
 import BlockUpSubStateMachine from "./BlockUpSubStateMachine";
+import DeadAirSubStateMachine from "./DeadAirSubStateMachine";
+import DeadSubStateMachine from "./DeadSubStateMachine";
 import IdleSubStateMachine from "./IdleSubStateMachine";
 import { PlayerManager } from "./PlayerManager";
 import TurnLeftSubStateMachine from "./TurnLeftSubStateMachine";
@@ -53,6 +56,13 @@ export class PlayerStateMachine extends StateMachine {
       FSM_PARAMS_NAME_ENUM.BLOCK_TURN_RIGHT,
       getInitParamsTrigger()
     );
+
+    /** 攻击动画 */
+    this.params.set(FSM_PARAMS_NAME_ENUM.ATTACK, getInitParamsTrigger());
+
+    /** 死亡动画 */
+    this.params.set(FSM_PARAMS_NAME_ENUM.DEAD, getInitParamsTrigger());
+    this.params.set(FSM_PARAMS_NAME_ENUM.AIRDEAD, getInitParamsTrigger());
   }
 
   /**
@@ -102,6 +112,21 @@ export class PlayerStateMachine extends StateMachine {
       new BlockTurnRightSubStateMachine(this)
     );
 
+    /** 攻击动画状态机 */
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.ATTACK,
+      new AttackSubStateMachine(this)
+    );
+
+    /** 死亡动画状态机 */
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.DEAD,
+      new DeadSubStateMachine(this)
+    );
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.AIRDEAD,
+      new DeadAirSubStateMachine(this)
+    );
     Utils.info(
       "PlayerStateMachine.initStateMachines()-end this.stateMachines",
       this.stateMachines
@@ -116,7 +141,7 @@ export class PlayerStateMachine extends StateMachine {
     this.animationComponent.on(Animation.EventType.FINISHED, () => {
       const animationName = this.animationComponent?.defaultClip?.name;
       // 如果路径中包含以下字符串,就在动画执行完后进入idle状态
-      const idleList = ["block", "turn"];
+      const idleList = ["block", "turn", "attack"];
       if (idleList.some((item) => animationName?.includes(item))) {
         // this.setParams(FSM_PARAMS_NAME_ENUM.IDLE, true); // 这样是直接修改动画状态机了,为了项目更加耦合,我们统一用状态去驱动状态机
         // 通过Cococ的组件内置方法找到PlayerManager组件,然后改变其状态
@@ -148,6 +173,9 @@ export class PlayerStateMachine extends StateMachine {
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_RIGHT):
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT):
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.BLOCK_TURN_RIGHT):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.ATTACK):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.DEAD):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.AIRDEAD):
         if (this.params.get(FSM_PARAMS_NAME_ENUM.BLOCK_UP).value) {
           this.currentState = this.stateMachines.get(
             FSM_PARAMS_NAME_ENUM.BLOCK_UP
@@ -183,6 +211,16 @@ export class PlayerStateMachine extends StateMachine {
         } else if (this.params.get(FSM_PARAMS_NAME_ENUM.TURN_RIGHT).value) {
           this.currentState = this.stateMachines.get(
             FSM_PARAMS_NAME_ENUM.TURN_RIGHT
+          );
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.ATTACK).value) {
+          this.currentState = this.stateMachines.get(
+            FSM_PARAMS_NAME_ENUM.ATTACK
+          );
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.DEAD).value) {
+          this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.DEAD);
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.AIRDEAD).value) {
+          this.currentState = this.stateMachines.get(
+            FSM_PARAMS_NAME_ENUM.AIRDEAD
           );
         } else if (this.params.get(FSM_PARAMS_NAME_ENUM.IDLE).value) {
           this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE);

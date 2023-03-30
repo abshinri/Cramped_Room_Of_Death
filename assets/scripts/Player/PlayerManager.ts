@@ -8,6 +8,7 @@ import {
   ENTITY_TYPE_ENUM,
   ENTITY_DIRECTION_TO_BLOCK_ENUM,
   FSM_PARAMS_NAME_ENUM,
+  DIRECTION_NUMBER_ENUM,
 } from "../../enums";
 import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
@@ -22,8 +23,9 @@ export class PlayerManager extends EntityManager {
    * 基类EntityManager包含的x,y是用于控制角色的位移动画的
    * 在实际的数据建模中, 角色的位置是以角色的建模坐标target为准的
    */
-  targetX: number = 2; // 主角的目标横向位置(实际为角色的建模坐标)
-  targetY: number = 8; // 主角的目标纵向位置(实际为角色的建模坐标),+为向上,-为向下
+  realX: number = 2; // 主角的目标横向位置(实际为角色的建模坐标)
+  realY: number = 8; // 主角的目标纵向位置(实际为角色的建模坐标),+为向上,-为向下
+  isMoving: boolean = false; // 主角是否正在移动
   private readonly speed = 1 / 10; // 主角移动速度
 
   inputHandle(input: CONTROL_ENUM) {
@@ -31,10 +33,64 @@ export class PlayerManager extends EntityManager {
     if (
       this.fsm.currentState !=
       this.fsm.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE)
-    )
+    ) {
       return;
+    }
     if (this.willBlock(input)) return;
+    if (this.willAttack(input)) return;
     this.move(input);
+  }
+
+  /**
+   * 判断玩家是否会触发攻击
+   * 我的判断是, 如果武器坐标和敌人单位重叠,则触发攻击动画
+   *
+   * @param {CONTROL_ENUM} input
+   */
+  willAttack(input: CONTROL_ENUM) {
+    // 提取方向,移动目标
+    const { realX: x, realY: y } = this;
+    /** 玩家当前位置 */
+    const playerCurrPos = new Vec2(x, y);
+    /** 武器当前位置 */
+    const weaponCurrPos = new Vec2(x, y);
+    /** 武器接下来的位置 */
+    const weaponNextPos = new Vec2(x, y);
+    /**  根据玩家面朝的方向, 提前计算武器的位置 */
+    if (this.direction === ENTITY_DIRECTION_ENUM.UP) {
+      /** 当玩家面朝上 */
+      weaponCurrPos.set(playerCurrPos.x, playerCurrPos.y - 1);
+      weaponNextPos.set(playerCurrPos.x, playerCurrPos.y - 2);
+    } else if (this.direction === ENTITY_DIRECTION_ENUM.DOWN) {
+      /** 当玩家面朝下 */
+      weaponCurrPos.set(playerCurrPos.x, playerCurrPos.y + 1);
+      weaponNextPos.set(playerCurrPos.x, playerCurrPos.y + 2);
+    } else if (this.direction === ENTITY_DIRECTION_ENUM.LEFT) {
+      /** 当玩家面朝左 */
+      weaponCurrPos.set(playerCurrPos.x - 1, playerCurrPos.y);
+      weaponNextPos.set(playerCurrPos.x - 2, playerCurrPos.y);
+    } else if (this.direction === ENTITY_DIRECTION_ENUM.RIGHT) {
+      /** 当玩家面朝右 */
+      weaponCurrPos.set(playerCurrPos.x + 1, playerCurrPos.y);
+      weaponNextPos.set(playerCurrPos.x + 2, playerCurrPos.y);
+    }
+    const { enemies } = DataManager.instance;
+    for (let index = 0; index < enemies.length; index++) {
+      const enemy = enemies[index];
+      if (enemy.state === ENTITY_STATE_ENUM.DEAD) continue;
+      const { x: enemyX, y: enemyY } = enemy;
+      const enemyCurrPos = new Vec2(enemyX, enemyY);
+
+      if (
+        weaponNextPos.equals(enemyCurrPos) ||
+        weaponCurrPos.equals(enemyCurrPos)
+      ) {
+        this.state = ENTITY_STATE_ENUM.ATTACK;
+        enemy.state = ENTITY_STATE_ENUM.DEAD;
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -44,7 +100,7 @@ export class PlayerManager extends EntityManager {
    */
   willBlock(input: CONTROL_ENUM) {
     // 提取方向,移动目标
-    const { targetX: x, targetY: y, direction } = this;
+    const { realX: x, realY: y, direction } = this;
 
     // 获取地图数据
     const { tiles } = DataManager.instance;
@@ -52,7 +108,7 @@ export class PlayerManager extends EntityManager {
     /**
      *  playerNextX, playerNextY: 玩家预计到达的坐标
      *  weaponNextX, weaponNextY: 武器预计到达的坐标
-     *  x, y: 玩家的坐标, 取值于TargetX, TargetY
+     *  x, y: 玩家的坐标, 取值于realX, realY
      *  因为this.x,this.y是随着update实时更新的, 在动画衔接中操作直接会取到非整数值
      *  1.玩家下一步的砖块要存在, 玩家才能移动,
      *  2.玩家下一步的砖块要能踩上去, 玩家才能移动
@@ -116,7 +172,7 @@ export class PlayerManager extends EntityManager {
        * 转向时,想一想,武器的位置是怎么变化的, 侧前的砖块在哪
        * 因为砖块时数组包数组的形式, 数组下标为从左到右从上到下增加
        * 所以以主人公为中心, 四个象限左上为x-,y- ,右下为x+,y+
-       * 转向时,主角中心点不变, 所以依旧取用主角的targetX,targetY也没问题
+       * 转向时,主角中心点不变, 所以依旧取用主角的realX,realY也没问题
        * moveVec取值就是单纯以主角的面朝方向为基准, 对应的武器x,y轴的增量
        * */
       /** 左转 */
@@ -159,6 +215,7 @@ export class PlayerManager extends EntityManager {
       );
     } else if (input === CONTROL_ENUM.TURN_LEFT || CONTROL_ENUM.TURN_RIGHT) {
       /** 转向独有的处理 */
+      EventManager.instance.emit(EVENT_ENUM.PLAYER_MOVE_END);
       return this.canTurnToTargetPosByTile(playerCurrPos, weaponNextPos, input);
     }
   }
@@ -229,13 +286,17 @@ export class PlayerManager extends EntityManager {
   // 控制角色移动
   move(input: CONTROL_ENUM) {
     if (input === CONTROL_ENUM.UP) {
-      this.targetY -= 1;
+      this.realY -= 1;
+      this.isMoving = true;
     } else if (input === CONTROL_ENUM.DOWN) {
-      this.targetY += 1;
+      this.realY += 1;
+      this.isMoving = true;
     } else if (input === CONTROL_ENUM.LEFT) {
-      this.targetX -= 1;
+      this.realX -= 1;
+      this.isMoving = true;
     } else if (input === CONTROL_ENUM.RIGHT) {
-      this.targetX += 1;
+      this.realX += 1;
+      this.isMoving = true;
     } else if (input === CONTROL_ENUM.TURN_LEFT) {
       this.state = ENTITY_STATE_ENUM.TURN_LEFT;
       if (this.direction === ENTITY_DIRECTION_ENUM.UP) {
@@ -263,29 +324,39 @@ export class PlayerManager extends EntityManager {
 
   // 让角色的坐标根据速度趋近于目标坐标,实现有动画的移动效果
   updatePosition() {
-    // 逼近targetX
-    if (this.targetX < this.x) {
+    if (!this.isMoving) return;
+    // 逼近realX
+    if (this.realX < this.x) {
       this.x -= this.speed;
-    } else if (this.targetX > this.x) {
+    } else if (this.realX > this.x) {
       this.x += this.speed;
     }
 
-    // 逼近targetY
-    if (this.targetY < this.y) {
+    // 逼近realY
+    if (this.realY < this.y) {
       this.y -= this.speed;
-    } else if (this.targetY > this.y) {
+    } else if (this.realY > this.y) {
       this.y += this.speed;
     }
 
-    // 坐标近似时就结束移动
+    // 坐标近似时就结束移动, 避免出现精度问题
     if (
-      Math.abs(this.targetX - this.x) < 0.01 &&
-      Math.abs(this.targetY - this.y) < 0.01
+      Math.abs(this.realX - this.x) < 0.01 &&
+      Math.abs(this.realY - this.y) < 0.01
     ) {
-      this.x = this.targetX;
-      this.y = this.targetY;
+      this.isMoving = false;
+      this.x = this.realX;
+      this.y = this.realY;
+      // 触发移动结束事件
+      EventManager.instance.emit(EVENT_ENUM.PLAYER_MOVE_END);
     }
   }
+
+  // 处理玩家死亡事件
+  playerDead(type: ENTITY_STATE_ENUM) {
+    this.state = type;
+  }
+
   update(dt: number) {
     this.updatePosition();
     super.update(dt);
@@ -311,6 +382,8 @@ export class PlayerManager extends EntityManager {
 
     // 当玩家按下操作按钮时, 触发move事件
     EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle, this);
+    // 当玩家收到攻击时, 直接挂
+    EventManager.instance.on(EVENT_ENUM.ATTACK_PLAYER, this.playerDead, this);
 
     Utils.info(
       "PlayerManager.init()-end DataManager.instance.tiles",

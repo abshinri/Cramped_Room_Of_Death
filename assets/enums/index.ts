@@ -28,7 +28,7 @@ export enum TILE_TYPE_ENUM {
 }
 
 /**
- * 事件枚举
+ * 事件类型枚举
  *
  * @export
  * @enum {string}
@@ -38,6 +38,12 @@ export enum EVENT_ENUM {
   NEXT_LEVEL = "NEXT_LEVEL",
   /** @member "玩家操作" */
   PLAYER_CONTROL = "PLAYER_CONTROL",
+  /** @member "玩家移动结束" */
+  PLAYER_MOVE_END = "PLAYER_MOVE_END",
+  /** @member "玩家创建结束" */
+  PLAYER_CREATE_END = "PLAYER_CREATE_END",
+  /** @member "攻击玩家" */
+  ATTACK_PLAYER = "ATTACK_PLAYER",
 }
 
 /**
@@ -83,6 +89,10 @@ export enum FSM_PARAMS_TYPE_ENUM {
 export enum FSM_PARAMS_NAME_ENUM {
   /** @member "站立" */
   IDLE = "IDLE",
+
+  /** @member "攻击" */
+  ATTACK = "ATTACK",
+
   /** @member "执行左转中" */
   TURN_LEFT = "TURN_LEFT",
   /** @member "执行右转中" */
@@ -104,6 +114,11 @@ export enum FSM_PARAMS_NAME_ENUM {
   BLOCK_TURN_LEFT = "BLOCK_TURN_LEFT",
   /** @member "右转的碰撞" */
   BLOCK_TURN_RIGHT = "BLOCK_TURN_RIGHT",
+
+  /** @member "死亡" */
+  DEAD = "DEAD",
+  /** @member "死在天上" */
+  AIRDEAD = "AIRDEAD",
 }
 
 /**
@@ -171,6 +186,10 @@ export enum DIRECTION_NUMBER_ENUM {
 export enum ENTITY_STATE_ENUM {
   /** @member "站立" */
   IDLE = "IDLE",
+
+  /** @member "攻击" */
+  ATTACK = "ATTACK",
+
   /** @member "左转" */
   TURN_LEFT = "TURN_LEFT",
   /** @member "右转" */
@@ -189,6 +208,11 @@ export enum ENTITY_STATE_ENUM {
   BLOCK_TURN_LEFT = "BLOCK_TURN_LEFT",
   /** @member "右转的碰撞" */
   BLOCK_TURN_RIGHT = "BLOCK_TURN_RIGHT",
+
+  /** @member "死亡" */
+  DEAD = "DEAD",
+  /** @member "死在天上" */
+  AIRDEAD = "AIRDEAD",
 }
 
 /**

@@ -7,6 +7,9 @@ import {
 import { ENTITY_STATE_ENUM, FSM_PARAMS_NAME_ENUM } from "../../enums";
 import Utils from "../Utils";
 import IdleSubStateMachine from "./IdleSubStateMachine";
+import AttackSubStateMachine from "./AttackSubStateMachine";
+import { WoodenSkeletonManager } from "./WoodenSkeletonManager";
+import DeadSubStateMachine from "./DeadSubStateMachine";
 
 const { ccclass, property } = _decorator;
 
@@ -25,6 +28,8 @@ export class WoodenSkeletonMachine extends StateMachine {
    */
   initParams() {
     this.params.set(FSM_PARAMS_NAME_ENUM.IDLE, getInitParamsTrigger());
+    this.params.set(FSM_PARAMS_NAME_ENUM.DEAD, getInitParamsTrigger());
+    this.params.set(FSM_PARAMS_NAME_ENUM.ATTACK, getInitParamsTrigger());
     this.params.set(FSM_PARAMS_NAME_ENUM.DIRECTION, getInitParamsNumber());
   }
 
@@ -38,6 +43,14 @@ export class WoodenSkeletonMachine extends StateMachine {
       FSM_PARAMS_NAME_ENUM.IDLE,
       new IdleSubStateMachine(this)
     );
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.DEAD,
+      new DeadSubStateMachine(this)
+    );
+    this.stateMachines.set(
+      FSM_PARAMS_NAME_ENUM.ATTACK,
+      new AttackSubStateMachine(this)
+    );
   }
 
   /**
@@ -46,16 +59,18 @@ export class WoodenSkeletonMachine extends StateMachine {
    */
   initAnimationEvent() {
     this.animationComponent.on(Animation.EventType.FINISHED, () => {
-      // const animationName = this.animationComponent?.defaultClip?.name;
-      // // 如果路径中包含以下字符串,就在动画执行完后进入idle状态
-      // const idleList = ["block", "turn"];
-      // if (idleList.some((item) => animationName?.includes(item))) {
-      //   // this.setParams(FSM_PARAMS_NAME_ENUM.IDLE, true); // 这样是直接修改动画状态机了,为了项目更加耦合,我们统一用状态去驱动状态机
-      //   // 通过Cococ的组件内置方法找到WoodenSkeletonManager组件,然后改变其状态
-      //   const WoodenSkeletonManager = this.node.getComponent(WoodenSkeletonMachine);
-      //   // const WoodenSkeletonManager = this.node.getComponent(EntityManager); // 这样也可以,查一下文档
-      //   WoodenSkeletonManager.state = ENTITY_STATE_ENUM.IDLE;
-      // }
+      const animationName = this.animationComponent?.defaultClip?.name;
+      // 如果路径中包含以下字符串,就在动画执行完后进入idle状态
+      const idleList = ["attack"];
+      if (idleList.some((item) => animationName?.includes(item))) {
+        // this.setParams(FSM_PARAMS_NAME_ENUM.IDLE, true); // 这样是直接修改动画状态机了,为了项目更加耦合,我们统一用状态去驱动状态机
+        // 通过Cococ的组件内置方法找到WoodenSkeletonManager组件,然后改变其状态
+        const woodenSkeletonManager = this.node.getComponent(
+          WoodenSkeletonManager
+        );
+        // const WoodenSkeletonManager = this.node.getComponent(EntityManager); // 这样也可以,查一下文档
+        woodenSkeletonManager.state = ENTITY_STATE_ENUM.IDLE;
+      }
     });
   }
 
@@ -66,9 +81,18 @@ export class WoodenSkeletonMachine extends StateMachine {
    */
   run() {
     switch (this.currentState) {
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.DEAD):
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE):
+      case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.ATTACK):
         if (this.params.get(FSM_PARAMS_NAME_ENUM.IDLE).value) {
           this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE);
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.DEAD).value) {
+          this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.DEAD);
+          break;
+        } else if (this.params.get(FSM_PARAMS_NAME_ENUM.ATTACK).value) {
+          this.currentState = this.stateMachines.get(
+            FSM_PARAMS_NAME_ENUM.ATTACK
+          );
         } else {
           // 如果没有状态可以转换,就保持当前状态
           this.currentState = this.currentState;

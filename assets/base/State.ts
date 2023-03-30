@@ -33,6 +33,8 @@ export default class State {
    *
    */
   run() {
+    // 动画播放不重复
+    if(this.fsm.animationComponent?.defaultClip?.name === this.animationClip?.name) return;
     this.fsm.animationComponent.defaultClip = this.animationClip;
     this.fsm.animationComponent.play();
 

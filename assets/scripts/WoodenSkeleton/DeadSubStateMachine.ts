@@ -1,4 +1,3 @@
-import { AnimationClip } from "cc";
 import State from "../../base/State";
 import { WoodenSkeletonMachine } from "./WoodenSkeletonMachine";
 import DirectionSubStateMachine from "../../base/DirectionSubStateMachine";
@@ -6,11 +5,11 @@ import {
   ENTITY_DIRECTION_ENUM,
 } from "../../enums";
 
-const BASE_URL = "/texture/woodenskeleton/idle";
+const BASE_URL = "/texture/woodenskeleton/death";
 
-export default class IdleSubStateMachine extends DirectionSubStateMachine {
+export default class DeadSubStateMachine extends DirectionSubStateMachine {
   /**
-   * 创建一个站立子状态机的实例
+   * 创建一个死亡子状态机的实例
    * @param {WoodenSkeletonMachine} fsm 木骷髅角色的状态机
    */
   constructor(fsm: WoodenSkeletonMachine) {
@@ -18,22 +17,22 @@ export default class IdleSubStateMachine extends DirectionSubStateMachine {
     // 配置站立时朝向的相关的状态
     this.stateMachines.set(
       ENTITY_DIRECTION_ENUM.UP,
-      new State(fsm, `${BASE_URL}/top`, AnimationClip.WrapMode.Loop)
+      new State(fsm, `${BASE_URL}/top`)
     );
 
     this.stateMachines.set(
       ENTITY_DIRECTION_ENUM.DOWN,
-      new State(fsm, `${BASE_URL}/bottom`, AnimationClip.WrapMode.Loop)
+      new State(fsm, `${BASE_URL}/bottom`)
     );
 
     this.stateMachines.set(
       ENTITY_DIRECTION_ENUM.LEFT,
-      new State(fsm, `${BASE_URL}/left`, AnimationClip.WrapMode.Loop)
+      new State(fsm, `${BASE_URL}/left`)
     );
 
     this.stateMachines.set(
       ENTITY_DIRECTION_ENUM.RIGHT,
-      new State(fsm, `${BASE_URL}/right`, AnimationClip.WrapMode.Loop)
+      new State(fsm, `${BASE_URL}/right`)
     );
   }
 }

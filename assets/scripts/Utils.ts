@@ -35,6 +35,18 @@ export default class Utils {
   static random(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
+  
+  /**
+   * 随机在数组里面取一个元素
+   *
+   * @static
+   * @template T
+   * @param {Array<T>} arr
+   * @returns {*}  {T}
+   */
+  static randomByArray<T>(arr: Array<T>): T {
+    return arr[Utils.random(0, arr.length - 1)];
+  }
 
   /**
    * 创建一个Node,默认设置好常用的属性

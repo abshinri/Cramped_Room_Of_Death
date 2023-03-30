@@ -1,5 +1,7 @@
+import { EntityManager } from "../base/EntityManager";
 import Singleton from "../base/Singleton";
 import { ITile } from "../interfaces";
+import { PlayerManager } from "../scripts/Player/PlayerManager";
 import { TileManager } from "../scripts/Stage/TileManager";
 
 /**
@@ -50,6 +52,20 @@ export default class DataManager extends Singleton {
   levelIndex: number = 1;
 
   /**
+   * 玩家信息
+   *
+   * @type {PlayerManager}
+   */
+  player: PlayerManager = null;
+
+  /**
+   * 敌人信息
+   * @type {Array<EntityManager>}
+   * @memberof DataManager
+   */
+  enemies: Array<EntityManager> = [];
+
+  /**
    * 重置数据
    *
    */
@@ -58,5 +74,8 @@ export default class DataManager extends Singleton {
     this.mapRowCount = 0;
     this.mapCol = 0;
     this.levelIndex = 1;
+    this.tiles = [];
+    this.player = null;
+    this.enemies = [];
   }
 }
