@@ -167,6 +167,8 @@ export class WoodenSkeletonManager extends EntityManager {
       y: playerY,
       state: playerState,
     } = DataManager.instance.player;
+    
+    // 如果玩家已经死亡, 则不攻击
     if (playerState === (ENTITY_STATE_ENUM.DEAD || ENTITY_STATE_ENUM.AIRDEAD)) {
       return;
     }
