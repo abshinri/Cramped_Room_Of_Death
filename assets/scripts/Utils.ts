@@ -35,7 +35,24 @@ export default class Utils {
   static random(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1) + min);
   }
-  
+
+  /**
+   * 指定长度生成随机字符串
+   *
+   * @static
+   * @param {number} len
+   * @returns {*}  {string}
+   */
+  static randomString(len: number): string {
+    const $chars = "ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678";
+    const maxPos = $chars.length;
+    let randomString = "";
+    for (let i = 0; i < len; i++) {
+      randomString += $chars.charAt(Math.floor(Math.random() * maxPos));
+    }
+    return randomString;
+  }
+
   /**
    * 随机在数组里面取一个元素
    *

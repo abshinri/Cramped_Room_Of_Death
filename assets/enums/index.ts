@@ -44,6 +44,10 @@ export enum EVENT_ENUM {
   PLAYER_CREATE_END = "PLAYER_CREATE_END",
   /** @member "攻击玩家" */
   ATTACK_PLAYER = "ATTACK_PLAYER",
+  /** @member "敌人死亡" */
+  ENEMY_DEAD = "ENEMY_DEAD",
+  /** @member "开门" */
+  DOOR_OPEN = "DOOR_OPEN",
 }
 
 /**
@@ -224,6 +228,10 @@ export enum ENTITY_STATE_ENUM {
 export enum ENTITY_TYPE_ENUM {
   /** @member "玩家" */
   PLAYER = "PLAYER",
-  /** @member "敌人" */
-  ENEMY = "ENEMY",
+  /** @member "敌人_木骷髅" */
+  ENEMY_WOODEN_SKELETON = "ENEMY_WOODEN_SKELETON",
+  /** @member "敌人_铁骷髅" */
+  ENEMY_IRON_SKELETON = "ENEMY_IRON_SKELETON",
+  /** @member "门" */
+  DOOR = "DOOR",
 }

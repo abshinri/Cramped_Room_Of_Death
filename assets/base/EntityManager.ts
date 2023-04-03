@@ -3,14 +3,8 @@ import {
   Component,
   Sprite,
   UITransform,
-  Animation,
-  animation,
-  AnimationClip,
-  SpriteFrame,
 } from "cc";
 import {
-  CONTROL_ENUM,
-  EVENT_ENUM,
   FSM_PARAMS_NAME_ENUM,
   ENTITY_DIRECTION_ENUM,
   ENTITY_STATE_ENUM,
@@ -21,10 +15,12 @@ import {
 import { TILE_WIDTH, TILE_HEIGHT } from "db://assets/scripts/Stage/MapManager";
 import { StateMachine } from "db://assets/base/StateMachine";
 import { IEntity } from "../interfaces";
+import Utils from "../scripts/Utils";
 const { ccclass, property } = _decorator;
 
 @ccclass("EntityManager")
 export class EntityManager extends Component {
+  id: string = Utils.randomString(8);
   fsm: StateMachine; // 状态机
   x: number = 0; // 实体的横向位置
   y: number = 0; // 实体的纵向位置
@@ -42,7 +38,7 @@ export class EntityManager extends Component {
    *
    */
   set direction(value: ENTITY_DIRECTION_ENUM) {
-    if(this._direction === value) return;
+    if (this._direction === value) return;
     this._direction = value;
     // 设置方向的状态级参数
     this.fsm.setParams(
@@ -95,4 +91,6 @@ export class EntityManager extends Component {
     // 初始化类型为实体类型
     this.type = params.type;
   }
+
+  protected onDestroy(): void {}
 }

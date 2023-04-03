@@ -3,7 +3,12 @@ const { ccclass, property } = _decorator;
 import Utils from "db://assets/scripts/Utils";
 import levels from "../../levels";
 import { ILevel } from "../../interfaces";
-import { EVENT_ENUM } from "../../enums";
+import {
+  ENTITY_DIRECTION_ENUM,
+  ENTITY_STATE_ENUM,
+  ENTITY_TYPE_ENUM,
+  EVENT_ENUM,
+} from "../../enums";
 
 import { MapManager } from "../Stage/MapManager";
 import { PlayerManager } from "../Player/PlayerManager";
@@ -11,6 +16,8 @@ import { PlayerManager } from "../Player/PlayerManager";
 import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
 import { WoodenSkeletonManager } from "../WoodenSkeleton/WoodenSkeletonManager";
+import { IronSkeletonManager } from "../IronSkeleton/IronSkeletonManager";
+import { DoorManager } from "../Door/DoorManager";
 
 @ccclass("BattleManager")
 export class BattleManager extends Component {
@@ -58,7 +65,13 @@ export class BattleManager extends Component {
     const player = Utils.createNode("player", this.tileMap);
     // 玩家管理器
     const playerManager = player.addComponent(PlayerManager);
-    await playerManager.init();
+    await playerManager.init({
+      x: 2,
+      y: 8,
+      state: ENTITY_STATE_ENUM.IDLE,
+      direction: ENTITY_DIRECTION_ENUM.UP,
+      type: ENTITY_TYPE_ENUM.PLAYER,
+    });
     DataManager.instance.player = playerManager;
   }
 
@@ -66,22 +79,63 @@ export class BattleManager extends Component {
 
   async generateEnemy() {
     // 手动创建节点
-    // 玩家节点
+    // 敌人节点
     const entity1 = Utils.createNode("woodenSkeleton", this.tileMap);
     const entity2 = Utils.createNode("woodenSkeleton", this.tileMap);
     const entity3 = Utils.createNode("woodenSkeleton", this.tileMap);
-    // 玩家管理器
+    const entity4 = Utils.createNode("ironSkeleton", this.tileMap);
+    // 敌人管理器
     const woodenSkeletonManager1 = entity1.addComponent(WoodenSkeletonManager);
     const woodenSkeletonManager2 = entity2.addComponent(WoodenSkeletonManager);
     const woodenSkeletonManager3 = entity3.addComponent(WoodenSkeletonManager);
-    await woodenSkeletonManager1.init({ x: 2, y: 2 });
-    await woodenSkeletonManager2.init({ x: 8, y: 2 });
-    await woodenSkeletonManager3.init({ x: 8, y: 6 });
+    const ironSkeletonManager4 = entity4.addComponent(IronSkeletonManager);
+    await woodenSkeletonManager1.init({
+      x: 2,
+      y: 2,
+      state: ENTITY_STATE_ENUM.IDLE,
+      direction: ENTITY_DIRECTION_ENUM.UP,
+      type: ENTITY_TYPE_ENUM.ENEMY_WOODEN_SKELETON,
+    });
+    await woodenSkeletonManager2.init({
+      x: 8,
+      y: 2,
+      state: ENTITY_STATE_ENUM.IDLE,
+      direction: ENTITY_DIRECTION_ENUM.UP,
+      type: ENTITY_TYPE_ENUM.ENEMY_WOODEN_SKELETON,
+    });
+    await woodenSkeletonManager3.init({
+      x: 8,
+      y: 6,
+      state: ENTITY_STATE_ENUM.IDLE,
+      direction: ENTITY_DIRECTION_ENUM.UP,
+      type: ENTITY_TYPE_ENUM.ENEMY_WOODEN_SKELETON,
+    });
+
+    await ironSkeletonManager4.init({
+      x: 2,
+      y: 6,
+      state: ENTITY_STATE_ENUM.IDLE,
+      direction: ENTITY_DIRECTION_ENUM.UP,
+      type: ENTITY_TYPE_ENUM.ENEMY_IRON_SKELETON,
+    });
     DataManager.instance.enemies = [
       woodenSkeletonManager1,
       woodenSkeletonManager2,
       woodenSkeletonManager3,
+      ironSkeletonManager4,
     ];
+  }
+
+  // 生成门
+  async generateDoor() {
+    // 手动创建节点
+    // 门节点
+    const door = Utils.createNode("door", this.tileMap);
+    // 门管理器
+    const doorManager = door.addComponent(DoorManager);
+    await doorManager.init({ x: 7, y: 8 });
+
+    DataManager.instance.door = doorManager;
   }
 
   async initStage() {
@@ -100,6 +154,7 @@ export class BattleManager extends Component {
     await this.generateTileMap();
     await this.generateEnemy();
     await this.generatePlayer();
+    await this.generateDoor();
 
     // 玩家创建完成, 发送事件, 通知敌人看向玩家
     EventManager.instance.emit(EVENT_ENUM.PLAYER_CREATE_END, true);

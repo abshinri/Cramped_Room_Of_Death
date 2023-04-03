@@ -1,8 +1,10 @@
-import { EntityManager } from "../base/EntityManager";
 import Singleton from "../base/Singleton";
 import { ITile } from "../interfaces";
+import { DoorManager } from "../scripts/Door/DoorManager";
+import { IronSkeletonManager } from "../scripts/IronSkeleton/IronSkeletonManager";
 import { PlayerManager } from "../scripts/Player/PlayerManager";
 import { TileManager } from "../scripts/Stage/TileManager";
+import { WoodenSkeletonManager } from "../scripts/WoodenSkeleton/WoodenSkeletonManager";
 
 /**
  * 数据管理中心
@@ -60,10 +62,17 @@ export default class DataManager extends Singleton {
 
   /**
    * 敌人信息
-   * @type {Array<EntityManager>}
+   * @type {Array<WoodenSkeletonManager|IronSkeletonManager>}
    * @memberof DataManager
    */
-  enemies: Array<EntityManager> = [];
+  enemies: Array<WoodenSkeletonManager | IronSkeletonManager> = [];
+
+  /**
+   * 门信息
+   *
+   * @type {DoorManager}
+   */
+  door: DoorManager = null;
 
   /**
    * 重置数据

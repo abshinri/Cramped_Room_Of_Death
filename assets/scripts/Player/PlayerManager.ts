@@ -15,6 +15,7 @@ import EventManager from "../../runtime/EventManager";
 import { TileManager } from "../Stage/TileManager";
 import Utils from "../Utils";
 import { PlayerStateMachine } from "./PlayerStateMachine";
+import { IEntity } from "../../interfaces";
 const { ccclass, property } = _decorator;
 
 @ccclass("PlayerManager")
@@ -37,17 +38,25 @@ export class PlayerManager extends EntityManager {
       return;
     }
     if (this.willBlock(input)) return;
-    if (this.willAttack(input)) return;
+
+    const enemyId = this.willAttack(input);
+    if (enemyId) {
+      EventManager.instance.emit(EVENT_ENUM.ENEMY_DEAD, enemyId);
+      EventManager.instance.emit(EVENT_ENUM.DOOR_OPEN);
+      return;
+    }
     this.move(input);
   }
 
   /**
    * 判断玩家是否会触发攻击
    * 我的判断是, 如果武器坐标和敌人单位重叠,则触发攻击动画
+   * 现在先根据视频做法, 确定敌人的实例后, 返回敌人的id
    *
    * @param {CONTROL_ENUM} input
+   * @return {*}  {string}
    */
-  willAttack(input: CONTROL_ENUM) {
+  willAttack(input: CONTROL_ENUM): string {
     // 提取方向,移动目标
     const { realX: x, realY: y } = this;
     /** 玩家当前位置 */
@@ -74,11 +83,14 @@ export class PlayerManager extends EntityManager {
       weaponCurrPos.set(playerCurrPos.x + 1, playerCurrPos.y);
       weaponNextPos.set(playerCurrPos.x + 2, playerCurrPos.y);
     }
-    const { enemies } = DataManager.instance;
+    // 可以先过滤掉死亡的敌人
+    const enemies = DataManager.instance.enemies.filter(
+      (enemy) => enemy.state !== ENTITY_STATE_ENUM.DEAD
+    );
     for (let index = 0; index < enemies.length; index++) {
       const enemy = enemies[index];
-      if (enemy.state === ENTITY_STATE_ENUM.DEAD) continue;
-      const { x: enemyX, y: enemyY } = enemy;
+      // if (enemy.state === ENTITY_STATE_ENUM.DEAD) continue;
+      const { x: enemyX, y: enemyY, id: enemyId } = enemy;
       const enemyCurrPos = new Vec2(enemyX, enemyY);
 
       if (
@@ -86,11 +98,11 @@ export class PlayerManager extends EntityManager {
         weaponCurrPos.equals(enemyCurrPos)
       ) {
         this.state = ENTITY_STATE_ENUM.ATTACK;
-        enemy.state = ENTITY_STATE_ENUM.DEAD;
-        return true;
+        // enemy.dead();
+        return enemyId;
       }
     }
-    return false;
+    return "";
   }
 
   /**
@@ -362,23 +374,12 @@ export class PlayerManager extends EntityManager {
     super.update(dt);
   }
 
-  async init() {
+  async init(params:IEntity) {
     // 加载玩家角色的状态机
     this.fsm = this.addComponent(PlayerStateMachine);
     await this.fsm.init();
 
-    super.init({
-      x: 2,
-      y: 8,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.PLAYER,
-    });
-
-    // 初始化状态为IDLE
-    this.state = ENTITY_STATE_ENUM.IDLE;
-    // 初始化方向为UP
-    this.direction = ENTITY_DIRECTION_ENUM.UP;
+    super.init(params);
 
     // 当玩家按下操作按钮时, 触发move事件
     EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle, this);
