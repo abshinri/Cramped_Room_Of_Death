@@ -1,5 +1,6 @@
 import Singleton from "../base/Singleton";
 import { ITile } from "../interfaces";
+import { BurstManager } from "../scripts/Burst/BurstManager";
 import { DoorManager } from "../scripts/Door/DoorManager";
 import { IronSkeletonManager } from "../scripts/IronSkeleton/IronSkeletonManager";
 import { PlayerManager } from "../scripts/Player/PlayerManager";
@@ -73,6 +74,14 @@ export default class DataManager extends Singleton {
    * @type {DoorManager}
    */
   door: DoorManager = null;
+  /**
+   * 掉落陷阱信息
+   *
+   * @type {Array<BurstManager>}
+   */
+  bursts: Array<BurstManager> = [];
+
+
 
   /**
    * 重置数据
@@ -86,5 +95,7 @@ export default class DataManager extends Singleton {
     this.tiles = [];
     this.player = null;
     this.enemies = [];
+    this.door = null;
+    this.bursts = [];
   }
 }

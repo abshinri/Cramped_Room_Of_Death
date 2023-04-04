@@ -1,18 +1,18 @@
 import { _decorator } from "cc";
-import { EntityManager } from "../../base/EntityManager";
+import { EnemyManager } from "../../base/EnemyManager";
 import {
   EVENT_ENUM,
   ENTITY_STATE_ENUM,
 } from "../../enums";
 import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
-import { WoodenSkeletonMachine } from "./WoodenSkeletonMachine";
+import { WoodenSkeletonStateMachine } from "./WoodenSkeletonStateMachine";
 const { ccclass, property } = _decorator;
 
 @ccclass("WoodenSkeletonManager")
-export class WoodenSkeletonManager extends EntityManager {
+export class WoodenSkeletonManager extends EnemyManager {
   async init(param) {
-    this.fsm = this.addComponent(WoodenSkeletonMachine);
+    this.fsm = this.addComponent(WoodenSkeletonStateMachine);
     await this.fsm.init();
 
     super.init(param);

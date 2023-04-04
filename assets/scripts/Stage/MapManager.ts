@@ -45,13 +45,15 @@ export class MapManager extends Component {
     // 砖块属性信息
     DataManager.instance.tiles = [];
 
+    const tilesNode = Utils.createNode("tiles", this.node);
+
     // 遍历地图上的每一个砖块
     // 传入的map是一个二维数组
     // map[i]表示的实际展示的地图的纵向每一列的数据的数组
     // map[i][j]则依次是从上到下的每一个砖块的数据
     DataManager.instance.map.forEach((col, colIndex) => {
       DataManager.instance.tiles[colIndex] = [];
-
+      
       col.forEach((tile, tileIndex) => {
         // 如果砖块类型或者砖块图片索引不存在，则不生成砖块
         if (!tile.type || !tile.src) {
@@ -59,7 +61,7 @@ export class MapManager extends Component {
           return;
         }
         // 添加自定义组件-砖块管理器
-        const tileManager = this.addComponent(TileManager);
+        const tileManager = tilesNode.addComponent(TileManager);
 
         // 当地图类型为1,5,9的时候, 进行一定量的随机处理
         // 同时不能过于随机, 否则会导致地图看起来很奇怪

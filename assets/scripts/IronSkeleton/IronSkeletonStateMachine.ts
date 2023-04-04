@@ -15,11 +15,11 @@ const { ccclass, property } = _decorator;
  * 铁骷髅角色的状态机
  *
  * @export
- * @class IronSkeletonMachine
+ * @class IronSkeletonStateMachine
  * @extends {StateMachine}
  */
-@ccclass("IronSkeletonMachine")
-export class IronSkeletonMachine extends StateMachine {
+@ccclass("IronSkeletonStateMachine")
+export class IronSkeletonStateMachine extends StateMachine {
   /**
    * 初始化状态参数Map
    *

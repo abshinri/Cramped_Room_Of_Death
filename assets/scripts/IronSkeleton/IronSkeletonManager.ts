@@ -1,12 +1,12 @@
 import { _decorator } from "cc";
 import { EnemyManager } from "../../base/EnemyManager";
-import { IronSkeletonMachine } from "./IronSkeletonMachine";
+import { IronSkeletonStateMachine } from "./IronSkeletonStateMachine";
 const { ccclass, property } = _decorator;
 
 @ccclass("IronSkeletonManager")
 export class IronSkeletonManager extends EnemyManager {
   async init(param) {
-    this.fsm = this.addComponent(IronSkeletonMachine);
+    this.fsm = this.addComponent(IronSkeletonStateMachine);
     await this.fsm.init();
 
     super.init(param);

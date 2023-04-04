@@ -6,22 +6,20 @@ import {
 } from "../../base/StateMachine";
 import { ENTITY_STATE_ENUM, FSM_PARAMS_NAME_ENUM } from "../../enums";
 import Utils from "../Utils";
-import IdleSubStateMachine from "./IdleSubStateMachine";
-import AttackSubStateMachine from "./AttackSubStateMachine";
-import { WoodenSkeletonManager } from "./WoodenSkeletonManager";
-import DeadSubStateMachine from "./DeadSubStateMachine";
-
+import { BurstManager } from "./BurstManager";
+import State from "../../base/State";
+const BASE_URL = "/texture/burst";
 const { ccclass, property } = _decorator;
 
 /**
- * 木骷髅角色的状态机
+ * 碎地板的状态机
  *
  * @export
- * @class WoodenSkeletonMachine
+ * @class BurstStateMachine
  * @extends {StateMachine}
  */
-@ccclass("WoodenSkeletonMachine")
-export class WoodenSkeletonMachine extends StateMachine {
+@ccclass("BurstStateMachine")
+export class BurstStateMachine extends StateMachine {
   /**
    * 初始化状态参数Map
    *
@@ -41,38 +39,18 @@ export class WoodenSkeletonMachine extends StateMachine {
     /** 站立动画状态机 */
     this.stateMachines.set(
       FSM_PARAMS_NAME_ENUM.IDLE,
-      new IdleSubStateMachine(this)
+      new State(this, `${BASE_URL}/idle`)
     );
     this.stateMachines.set(
       FSM_PARAMS_NAME_ENUM.DEAD,
-      new DeadSubStateMachine(this)
+      new State(this, `${BASE_URL}/death`)
     );
     this.stateMachines.set(
       FSM_PARAMS_NAME_ENUM.ATTACK,
-      new AttackSubStateMachine(this)
+      new State(this, `${BASE_URL}/attack`)
     );
   }
 
-  /**
-   * 初始化动画事件
-   * 每次动画执行完后,应该执行一些操作,比如切换到另外一个状态
-   */
-  initAnimationEvent() {
-    this.animationComponent.on(Animation.EventType.FINISHED, () => {
-      const animationName = this.animationComponent?.defaultClip?.name;
-      // 如果路径中包含以下字符串,就在动画执行完后进入idle状态
-      const idleList = ["attack"];
-      if (idleList.some((item) => animationName?.includes(item))) {
-        // this.setParams(FSM_PARAMS_NAME_ENUM.IDLE, true); // 这样是直接修改动画状态机了,为了项目更加耦合,我们统一用状态去驱动状态机
-        // 通过Cococ的组件内置方法找到WoodenSkeletonManager组件,然后改变其状态
-        const woodenSkeletonManager = this.node.getComponent(
-          WoodenSkeletonManager
-        );
-        // const WoodenSkeletonManager = this.node.getComponent(EntityManager); // 这样也可以,查一下文档
-        woodenSkeletonManager.state = ENTITY_STATE_ENUM.IDLE;
-      }
-    });
-  }
 
   /**
    * 执行状态机
@@ -108,7 +86,6 @@ export class WoodenSkeletonMachine extends StateMachine {
     this.animationComponent = this.addComponent(Animation);
     this.initParams();
     this.initStateMachines();
-    this.initAnimationEvent();
     await Promise.all(this.waitingList);
   }
 }

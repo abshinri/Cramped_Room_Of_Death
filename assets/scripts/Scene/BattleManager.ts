@@ -18,6 +18,7 @@ import EventManager from "../../runtime/EventManager";
 import { WoodenSkeletonManager } from "../WoodenSkeleton/WoodenSkeletonManager";
 import { IronSkeletonManager } from "../IronSkeleton/IronSkeletonManager";
 import { DoorManager } from "../Door/DoorManager";
+import { BurstManager } from "../Burst/BurstManager";
 
 @ccclass("BattleManager")
 export class BattleManager extends Component {
@@ -56,27 +57,7 @@ export class BattleManager extends Component {
     this.tileMap.destroyAllChildren();
   }
 
-  // #endregion
-  // #region 玩家相关
-  // 生成玩家
-  async generatePlayer() {
-    // 手动创建节点
-    // 玩家节点
-    const player = Utils.createNode("player", this.tileMap);
-    // 玩家管理器
-    const playerManager = player.addComponent(PlayerManager);
-    await playerManager.init({
-      x: 2,
-      y: 8,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.PLAYER,
-    });
-    DataManager.instance.player = playerManager;
-  }
-
-  // #endregion
-
+  // 生成敌人
   async generateEnemy() {
     // 手动创建节点
     // 敌人节点
@@ -113,7 +94,7 @@ export class BattleManager extends Component {
 
     await ironSkeletonManager4.init({
       x: 2,
-      y: 6,
+      y: 5,
       state: ENTITY_STATE_ENUM.IDLE,
       direction: ENTITY_DIRECTION_ENUM.UP,
       type: ENTITY_TYPE_ENUM.ENEMY_IRON_SKELETON,
@@ -133,9 +114,50 @@ export class BattleManager extends Component {
     const door = Utils.createNode("door", this.tileMap);
     // 门管理器
     const doorManager = door.addComponent(DoorManager);
-    await doorManager.init({ x: 7, y: 8 });
+    await doorManager.init({
+      x: 7,
+      y: 8,
+      state: ENTITY_STATE_ENUM.IDLE,
+      direction: ENTITY_DIRECTION_ENUM.UP,
+      type: ENTITY_TYPE_ENUM.DOOR,
+    });
 
     DataManager.instance.door = doorManager;
+  }
+
+  // 生成掉落陷阱
+  async generateBurst() {
+    // 手动创建节点
+    // 掉落陷阱节点
+    const burst = Utils.createNode("burst", this.tileMap);
+    // 掉落陷阱管理器
+    const burstManager = burst.addComponent(BurstManager);
+    await burstManager.init({
+      x: 2,
+      y: 9,
+      state: ENTITY_STATE_ENUM.IDLE,
+      direction: ENTITY_DIRECTION_ENUM.UP,
+      type: ENTITY_TYPE_ENUM.BURST,
+    });
+
+    DataManager.instance.bursts.push(burstManager);
+  }
+
+  // 生成玩家
+  async generatePlayer() {
+    // 手动创建节点
+    // 玩家节点
+    const player = Utils.createNode("player", this.tileMap);
+    // 玩家管理器
+    const playerManager = player.addComponent(PlayerManager);
+    await playerManager.init({
+      x: 2,
+      y: 8,
+      state: ENTITY_STATE_ENUM.IDLE,
+      direction: ENTITY_DIRECTION_ENUM.UP,
+      type: ENTITY_TYPE_ENUM.PLAYER,
+    });
+    DataManager.instance.player = playerManager;
   }
 
   async initStage() {
@@ -153,9 +175,9 @@ export class BattleManager extends Component {
 
     await this.generateTileMap();
     await this.generateEnemy();
-    await this.generatePlayer();
+    await this.generateBurst();
     await this.generateDoor();
-
+    await this.generatePlayer();
     // 玩家创建完成, 发送事件, 通知敌人看向玩家
     EventManager.instance.emit(EVENT_ENUM.PLAYER_CREATE_END, true);
   }

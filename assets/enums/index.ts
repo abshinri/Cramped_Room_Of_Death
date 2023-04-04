@@ -234,4 +234,6 @@ export enum ENTITY_TYPE_ENUM {
   ENEMY_IRON_SKELETON = "ENEMY_IRON_SKELETON",
   /** @member "门" */
   DOOR = "DOOR",
+  /** @member "掉落陷阱" */
+  BURST = "BURST",
 }

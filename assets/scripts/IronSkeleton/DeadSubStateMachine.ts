@@ -1,5 +1,5 @@
 import State from "../../base/State";
-import { IronSkeletonMachine } from "./IronSkeletonMachine";
+import { IronSkeletonStateMachine } from "./IronSkeletonStateMachine";
 import DirectionSubStateMachine from "../../base/DirectionSubStateMachine";
 import {
   ENTITY_DIRECTION_ENUM,
@@ -10,9 +10,9 @@ const BASE_URL = "/texture/ironskeleton/death";
 export default class DeadSubStateMachine extends DirectionSubStateMachine {
   /**
    * 创建一个死亡子状态机的实例
-   * @param {IronSkeletonMachine} fsm 铁骷髅角色的状态机
+   * @param {IronSkeletonStateMachine} fsm 铁骷髅角色的状态机
    */
-  constructor(fsm: IronSkeletonMachine) {
+  constructor(fsm: IronSkeletonStateMachine) {
     super(fsm);
     // 配置站立时朝向的相关的状态
     this.stateMachines.set(

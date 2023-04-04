@@ -9,21 +9,16 @@ import {
 import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
 import { DoorStateMachine } from "./DoorStateMachine";
+import { IEntity } from "../../interfaces";
 const { ccclass, property } = _decorator;
 
 @ccclass("DoorManager")
 export class DoorManager extends EntityManager {
-  async init(param = { x: 2, y: 2 }) {
+  async init(param: IEntity) {
     this.fsm = this.addComponent(DoorStateMachine);
     await this.fsm.init();
 
-    super.init({
-      x: param.x,
-      y: param.y,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.DOOR,
-    });
+    super.init(param);
 
     EventManager.instance.on(EVENT_ENUM.DOOR_OPEN, this.onDoorOpen, this);
   }
