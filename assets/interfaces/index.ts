@@ -29,6 +29,19 @@ export interface ITile {
 }
 
 /**
+ * 接口：尖刺陷阱基本属性
+ *
+ * @export
+ * @interface ISpikes
+ */
+export interface ISpikes {
+  x: number;
+  y: number;
+  type: ENTITY_TYPE_ENUM;
+  count: number;
+}
+
+/**
  * 接口：实体基本属性
  *
  * @export

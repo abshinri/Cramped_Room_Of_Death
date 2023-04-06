@@ -8,6 +8,7 @@ import {
   ENTITY_STATE_ENUM,
   ENTITY_TYPE_ENUM,
   EVENT_ENUM,
+  SPIKES_STATE_ENUM,
 } from "../../enums";
 
 import { MapManager } from "../Stage/MapManager";
@@ -19,6 +20,7 @@ import { WoodenSkeletonManager } from "../WoodenSkeleton/WoodenSkeletonManager";
 import { IronSkeletonManager } from "../IronSkeleton/IronSkeletonManager";
 import { DoorManager } from "../Door/DoorManager";
 import { BurstManager } from "../Burst/BurstManager";
+import { SpikesManager } from "../Spikes/SpikesManager";
 
 @ccclass("BattleManager")
 export class BattleManager extends Component {
@@ -133,7 +135,7 @@ export class BattleManager extends Component {
     // 掉落陷阱管理器
     const burstManager = burst.addComponent(BurstManager);
     await burstManager.init({
-      x: 2,
+      x: 3,
       y: 9,
       state: ENTITY_STATE_ENUM.IDLE,
       direction: ENTITY_DIRECTION_ENUM.UP,
@@ -141,6 +143,23 @@ export class BattleManager extends Component {
     });
 
     DataManager.instance.bursts.push(burstManager);
+  }
+
+  // 生成尖刺陷阱
+  async generateSpikes() {
+    // 手动创建节点
+    // 尖刺陷阱节点
+    const spikes = Utils.createNode("spikes", this.tileMap);
+    // 尖刺陷阱管理器
+    const spikesManager = spikes.addComponent(SpikesManager);
+    await spikesManager.init({
+      x: 2,
+      y: 9,
+      count: 0,
+      type: ENTITY_TYPE_ENUM.SPIKES_ONE,
+    });
+
+    DataManager.instance.spikes.push(spikesManager);
   }
 
   // 生成玩家
@@ -176,6 +195,7 @@ export class BattleManager extends Component {
     await this.generateTileMap();
     await this.generateEnemy();
     await this.generateBurst();
+    await this.generateSpikes();
     await this.generateDoor();
     await this.generatePlayer();
     // 玩家创建完成, 发送事件, 通知敌人看向玩家

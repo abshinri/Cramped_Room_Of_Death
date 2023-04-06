@@ -123,6 +123,20 @@ export enum FSM_PARAMS_NAME_ENUM {
   DEAD = "DEAD",
   /** @member "死在天上" */
   AIRDEAD = "AIRDEAD",
+
+  /** @member "尖刺陷阱当前计数" */
+  SPIKES_CUR_COUNT = "SPIKES_CUR_COUNT",
+  /** @member "尖刺陷阱总计数" */
+  SPIKES_TOTAL_COUNT = "SPIKES_TOTAL_COUNT",
+
+  /** @member "一尖刺陷阱" */
+  SPIKES_ONE = "SPIKES_ONE",
+  /** @member "二尖刺陷阱" */
+  SPIKES_TWO = "SPIKES_TWO",
+  /** @member "三尖刺陷阱" */
+  SPIKES_THREE = "SPIKES_THREE",
+  /** @member "四尖刺陷阱" */
+  SPIKES_FOUR = "SPIKES_FOUR",
 }
 
 /**
@@ -236,4 +250,45 @@ export enum ENTITY_TYPE_ENUM {
   DOOR = "DOOR",
   /** @member "掉落陷阱" */
   BURST = "BURST",
+  /** @member "一尖刺陷阱" */
+  SPIKES_ONE = "SPIKES_ONE",
+  /** @member "二尖刺陷阱" */
+  SPIKES_TWO = "SPIKES_TWO",
+  /** @member "三尖刺陷阱" */
+  SPIKES_THREE = "SPIKES_THREE",
+  /** @member "四尖刺陷阱" */
+  SPIKES_FOUR = "SPIKES_FOUR",
+}
+
+/**
+ * 尖刺陷阱类型转数字枚举
+ *
+ * @export
+ * @enum {number}
+ */
+export enum SPIKES_TYPE_TO_NUMBER_ENUM {
+  /** @member "一尖刺陷阱" */
+  SPIKES_ONE = 2,
+  /** @member "二尖刺陷阱" */
+  SPIKES_TWO = 3,
+  /** @member "三尖刺陷阱" */
+  SPIKES_THREE = 4,
+  /** @member "四尖刺陷阱" */
+  SPIKES_FOUR = 5,
+}
+
+// 尖刺状态枚举
+export enum SPIKES_STATE_ENUM {
+  /** @member "零" */
+  ZERO = "ZERO",
+  /** @member "一" */
+  ONE = "ONE",
+  /** @member "二" */
+  TWO = "TWO",
+  /** @member "三" */
+  THREE = "THREE",
+  /** @member "四" */
+  FOUR = "FOUR",
+  /** @member "五" */
+  FIVE = "FIVE",
 }
