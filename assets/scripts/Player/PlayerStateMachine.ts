@@ -127,10 +127,6 @@ export class PlayerStateMachine extends StateMachine {
       FSM_PARAMS_NAME_ENUM.AIRDEAD,
       new DeadAirSubStateMachine(this)
     );
-    Utils.info(
-      "PlayerStateMachine.initStateMachines()-end this.stateMachines",
-      this.stateMachines
-    );
   }
 
   /**
@@ -158,11 +154,6 @@ export class PlayerStateMachine extends StateMachine {
    *
    */
   run() {
-    Utils.info(
-      "PlayerStateMachine.run()-start this.currentState",
-      this.currentState
-    );
-
     switch (this.currentState) {
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE):
       case this.stateMachines.get(FSM_PARAMS_NAME_ENUM.TURN_LEFT):
@@ -233,11 +224,6 @@ export class PlayerStateMachine extends StateMachine {
         this.currentState = this.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE);
         break;
     }
-
-    Utils.info(
-      "PlayerStateMachine.run()-end this.currentState",
-      this.currentState
-    );
   }
 
   async init() {

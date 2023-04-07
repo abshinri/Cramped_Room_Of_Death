@@ -261,7 +261,9 @@ export enum ENTITY_TYPE_ENUM {
 }
 
 /**
- * 尖刺陷阱类型转数字枚举
+ * 尖刺陷阱类型转状态类型总数数字枚举
+ * 同时状态也表示了尖刺陷阱存在的状态总数
+ * 例如：SPIKES_ONE = 2，表示一尖刺陷阱有0,1,2三种状态
  *
  * @export
  * @enum {number}
@@ -291,4 +293,20 @@ export enum SPIKES_STATE_ENUM {
   FOUR = "FOUR",
   /** @member "五" */
   FIVE = "FIVE",
+}
+
+// 尖刺状态字符串转数字枚举
+export enum SPIKES_STATE_TO_NUMBER_ENUM {
+  /** @member "零" */
+  ZERO = 0,
+  /** @member "一" */
+  ONE = 1,
+  /** @member "二" */
+  TWO = 2,
+  /** @member "三" */
+  THREE = 3,
+  /** @member "四" */
+  FOUR = 4,
+  /** @member "五" */
+  FIVE = 5,
 }

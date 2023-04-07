@@ -38,14 +38,15 @@ export class PlayerManager extends EntityManager {
       return;
     }
 
-    if (this.willBlock(input)) return;
-
     const enemyId = this.willAttackGetEnemyId(input);
     if (enemyId) {
       EventManager.instance.emit(EVENT_ENUM.ENEMY_DEAD, enemyId);
       EventManager.instance.emit(EVENT_ENUM.DOOR_OPEN);
       return;
     }
+
+    if (this.willBlock(input)) return;
+
     this.move(input);
   }
 
@@ -230,9 +231,9 @@ export class PlayerManager extends EntityManager {
 
     if (
       input === CONTROL_ENUM.UP ||
-      CONTROL_ENUM.DOWN ||
-      CONTROL_ENUM.LEFT ||
-      CONTROL_ENUM.RIGHT
+      input === CONTROL_ENUM.DOWN ||
+      input === CONTROL_ENUM.LEFT ||
+      input === CONTROL_ENUM.RIGHT
     ) {
       /** 平移独有的处理 */
       /** 判断是否能移动到目标位置, 不能则播放撞墙动画 */
@@ -243,7 +244,10 @@ export class PlayerManager extends EntityManager {
         this.state = ENTITY_DIRECTION_TO_BLOCK_ENUM[this.direction];
         return true;
       }
-    } else if (input === CONTROL_ENUM.TURN_LEFT || CONTROL_ENUM.TURN_RIGHT) {
+    } else if (
+      input === CONTROL_ENUM.TURN_LEFT ||
+      input === CONTROL_ENUM.TURN_RIGHT
+    ) {
       /** 转向独有的处理 */
       /** 判断是否能转向到目标位置, 不能则播放撞墙动画 */
       const canTurn = this.canTurnToTargetByPos(weaponCurrPos, weaponNextPos);
@@ -301,14 +305,16 @@ export class PlayerManager extends EntityManager {
     const { door, enemies, bursts } = DataManager.instance;
 
     if (
-      this.haveEntityByPos(playerNextPos, door) ||
-      this.haveEntityByPos(weaponNextPos, door)
+      door &&
+      (this.haveEntityByPos(playerNextPos, door) ||
+        this.haveEntityByPos(weaponNextPos, door))
     ) {
       // 门
       return false;
     } else if (
-      enemies.some((enemy) => this.haveEntityByPos(playerNextPos, enemy)) ||
-      enemies.some((enemy) => this.haveEntityByPos(weaponNextPos, enemy))
+      enemies &&
+      (enemies.some((enemy) => this.haveEntityByPos(playerNextPos, enemy)) ||
+        enemies.some((enemy) => this.haveEntityByPos(weaponNextPos, enemy)))
     ) {
       // 敌人
       return false;
@@ -340,7 +346,8 @@ export class PlayerManager extends EntityManager {
 
   /**
    * 根据地形判断角色是否能够转动到目标位置
-   * @param {Vec2} weaponCurrPos 玩家的位置信息
+   * 我想法是, 要判断武器能否转动, 就要看武器的当前位置,武器转动方向一侧一格,转动后的位置是否有墙或者活着的实体, 如果有, 则被挡住
+   * @param {Vec2} weaponCurrPos 武器现在的位置信息
    * @param {Vec2} weaponNextPos 武器接下来的位置信息
    * @returns {boolean}
    */
@@ -348,37 +355,73 @@ export class PlayerManager extends EntityManager {
     // 获取地图,门,敌人数据
     const { door, enemies } = DataManager.instance;
     if (
-      (door.x === weaponCurrPos.x && door.y === weaponNextPos.y) ||
+      (door.x === weaponCurrPos.x && door.y === weaponCurrPos.y) ||
       (door.x === weaponNextPos.x && door.y === weaponNextPos.y) ||
-      (door.x === weaponNextPos.x && door.y === weaponCurrPos.y)
+      (door.x === weaponNextPos.x &&
+        door.y === weaponCurrPos.y &&
+        (this.direction === ENTITY_DIRECTION_ENUM.UP ||
+          this.direction === ENTITY_DIRECTION_ENUM.DOWN)) ||
+      (door.x === weaponCurrPos.x &&
+        door.y === weaponNextPos.y &&
+        (this.direction === ENTITY_DIRECTION_ENUM.LEFT ||
+          this.direction === ENTITY_DIRECTION_ENUM.RIGHT))
     ) {
       // 门
       return false;
     } else if (
       enemies.some(
         (enemy) =>
-          (enemy.x === weaponCurrPos.x && enemy.y === weaponNextPos.y) ||
+          (enemy.x === weaponCurrPos.x && enemy.y === weaponCurrPos.y) ||
           (enemy.x === weaponNextPos.x && enemy.y === weaponNextPos.y) ||
-          (enemy.x === weaponNextPos.x && enemy.y === weaponCurrPos.y)
+          (enemy.x === weaponNextPos.x &&
+            enemy.y === weaponCurrPos.y &&
+            (this.direction === ENTITY_DIRECTION_ENUM.UP ||
+              this.direction === ENTITY_DIRECTION_ENUM.DOWN)) ||
+          (enemy.x === weaponCurrPos.x &&
+            enemy.y === weaponNextPos.y &&
+            (this.direction === ENTITY_DIRECTION_ENUM.LEFT ||
+              this.direction === ENTITY_DIRECTION_ENUM.RIGHT))
       )
     ) {
       // 敌人
       return false;
-    } else if (
-      !(
-        DataManager.instance.tiles[weaponCurrPos.x][weaponNextPos.y] &&
-        DataManager.instance.tiles[weaponCurrPos.x][weaponNextPos.y].turnable &&
-        DataManager.instance.tiles[weaponNextPos.x][weaponNextPos.y] &&
-        DataManager.instance.tiles[weaponNextPos.x][weaponNextPos.y].turnable &&
-        DataManager.instance.tiles[weaponNextPos.x][weaponCurrPos.y] &&
-        DataManager.instance.tiles[weaponNextPos.x][weaponCurrPos.y].turnable
-      )
-    ) {
-      // 玩家的前方,侧前方,侧方有墙
+    } else if (!this.checkWallTurnableByPos(weaponCurrPos, weaponNextPos)) {
+      // 检测结果为不能转动, 因为玩家的前方,侧前方,侧方有墙
       return false;
     } else {
       return true;
     }
+  }
+
+  /**
+   * 根据朝向判断武器前方,侧前方,侧方是否有墙
+   *
+   * @param {*} weaponCurrPos
+   * @param {*} weaponNextPos
+   * @returns {*}
+   */
+  checkWallTurnableByPos(weaponCurrPos, weaponNextPos) {
+    let checkBlocks = [
+      DataManager.instance.tiles[weaponCurrPos.x][weaponCurrPos.y],
+      DataManager.instance.tiles[weaponNextPos.x][weaponNextPos.y],
+    ];
+    if (
+      this.direction === ENTITY_DIRECTION_ENUM.UP ||
+      this.direction === ENTITY_DIRECTION_ENUM.DOWN
+    ) {
+      checkBlocks.push(
+        DataManager.instance.tiles[weaponNextPos.x][weaponCurrPos.y]
+      );
+    } else if (
+      this.direction === ENTITY_DIRECTION_ENUM.LEFT ||
+      this.direction === ENTITY_DIRECTION_ENUM.RIGHT
+    ) {
+      checkBlocks.push(
+        DataManager.instance.tiles[weaponCurrPos.x][weaponNextPos.y]
+      );
+    }
+    Utils.log("checkBlocks", checkBlocks);
+    return checkBlocks.every((block) => block && block.turnable);
   }
 
   // 控制角色移动
@@ -418,6 +461,9 @@ export class PlayerManager extends EntityManager {
         this.direction = ENTITY_DIRECTION_ENUM.DOWN;
       }
     }
+
+    // 触发操作结束事件
+    EventManager.instance.emit(EVENT_ENUM.PLAYER_MOVE_END);
   }
 
   // 让角色的坐标根据速度趋近于目标坐标,实现有动画的移动效果
@@ -445,8 +491,6 @@ export class PlayerManager extends EntityManager {
       this.isMoving = false;
       this.x = this.realX;
       this.y = this.realY;
-      // 触发移动结束事件
-      EventManager.instance.emit(EVENT_ENUM.PLAYER_MOVE_END);
     }
   }
 
@@ -471,10 +515,5 @@ export class PlayerManager extends EntityManager {
     EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle, this);
     // 当玩家收到攻击时, 直接挂
     EventManager.instance.on(EVENT_ENUM.ATTACK_PLAYER, this.playerDead, this);
-
-    Utils.info(
-      "PlayerManager.init()-end DataManager.instance.tiles",
-      DataManager.instance.tiles
-    );
   }
 }

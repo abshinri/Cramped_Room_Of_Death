@@ -1,4 +1,5 @@
 import Singleton from "../base/Singleton";
+import Utils from "../scripts/Utils";
 interface IEventMapItem {
   callback: Function;
   ctx: any;

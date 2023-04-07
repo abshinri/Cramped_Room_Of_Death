@@ -70,6 +70,40 @@ export interface ILevel {
    * @memberof ILevel
    */
   map: Array<Array<ITile>>;
+
+  /**
+   * 玩家信息
+   *
+   * @type {IEntity}
+   */
+  player: IEntity;
+
+  /**
+   * 敌人信息
+   * @type {Array<IEntity>}
+   */
+  enemies: Array<IEntity>;
+
+  /**
+   * 门信息
+   *
+   * @type {IEntity}
+   */
+  door: IEntity;
+
+  /**
+   * 掉落陷阱信息
+   *
+   * @type {Array<IEntity>}
+   */
+  bursts: Array<IEntity>;
+
+  /**
+   * 掉落尖刺信息
+   *
+   * @type {Array<ISpikes>}
+   */
+  spikes: Array<ISpikes>;
 }
 
 /**

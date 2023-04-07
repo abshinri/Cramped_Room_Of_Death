@@ -73,13 +73,6 @@ export abstract class StateMachine extends Component {
   setParams(paramsName: string, value: boolean | number) {
     if (this.params.has(paramsName)) {
       this.params.get(paramsName).value = value;
-
-      Utils.info(
-        "StateMachine.setParams()-start paramsName,value,this.params",
-        paramsName,
-        value,
-        this.params
-      );
       this.run();
       this.resetTrigger();
     }

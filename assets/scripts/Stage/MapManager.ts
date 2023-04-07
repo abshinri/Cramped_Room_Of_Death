@@ -96,14 +96,5 @@ export class MapManager extends Component {
     });
 
     this.centerTileMap();
-    Utils.info(
-      "MapManager.init()-end DataManager.instance.tiles",
-      DataManager.instance.tiles
-    );
-
-    Utils.info(
-      "MapManager.init()-end DataManager.instance.map",
-      DataManager.instance.map
-    );
   }
 }

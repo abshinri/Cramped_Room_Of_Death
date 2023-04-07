@@ -1,15 +1,18 @@
-import { _decorator, Component, Sprite, UITransform } from "cc";
+import { _decorator, Component, Event, Sprite, UITransform } from "cc";
 import {
   FSM_PARAMS_NAME_ENUM,
   ENTITY_STATE_ENUM,
   ENTITY_TYPE_ENUM,
   SPIKES_TYPE_TO_NUMBER_ENUM,
+  EVENT_ENUM,
 } from "db://assets/enums";
 import { TILE_WIDTH, TILE_HEIGHT } from "db://assets/scripts/Stage/MapManager";
 import { StateMachine } from "db://assets/base/StateMachine";
 import { IEntity, ISpikes } from "db://assets/interfaces";
 import Utils from "db://assets/scripts/Utils";
 import { SpikesStateMachine } from "./SpikesStateMachine";
+import EventManager from "../../runtime/EventManager";
+import DataManager from "../../runtime/DataManager";
 const { ccclass, property } = _decorator;
 
 @ccclass("SpikesManager")
@@ -42,13 +45,38 @@ export class SpikesManager extends Component {
   }
 
   /**
-   * 尖刺类型, 不同的尖刺总数就有不同的尖刺类型, 也是尖刺计数的上限
+   * 尖刺类型, 不同的尖刺总数就有不同的尖刺类型, 也是尖刺状态计数的上限
    *
    */
   set totalCount(value: number) {
     if (this._totalCount === value) return;
     this._totalCount = value;
     this.fsm.setParams(FSM_PARAMS_NAME_ENUM.SPIKES_TOTAL_COUNT, value);
+  }
+
+  // 玩家每行动一次, 尖刺状态计数加一
+  onPlayerMoveEnd() {
+    this.count++;
+    this.attackPlayer();
+  }
+
+  attackPlayer() {
+    const { realX: playerX, realY: playerY } = DataManager.instance.player;
+    if (
+      this.count === this.totalCount &&
+      this.x === playerX &&
+      this.y === playerY
+    ) {
+      EventManager.instance.emit(
+        EVENT_ENUM.ATTACK_PLAYER,
+        ENTITY_STATE_ENUM.DEAD
+      );
+    }
+  }
+
+  // 尖刺攻击之后, 重置计数
+  resetState() {
+    this.count = 0;
   }
 
   update(dt: number) {
@@ -84,7 +112,19 @@ export class SpikesManager extends Component {
     this.totalCount = SPIKES_TYPE_TO_NUMBER_ENUM[params.type];
     // 初始化当前尖刺状态
     this.count = params.count;
+
+    EventManager.instance.on(
+      EVENT_ENUM.PLAYER_MOVE_END,
+      this.onPlayerMoveEnd,
+      this
+    );
   }
 
-  protected onDestroy(): void {}
+  protected onDestroy(): void {
+    EventManager.instance.off(
+      EVENT_ENUM.PLAYER_MOVE_END,
+      this.onPlayerMoveEnd,
+      this
+    );
+  }
 }

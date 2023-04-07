@@ -61,52 +61,27 @@ export class BattleManager extends Component {
 
   // 生成敌人
   async generateEnemy() {
-    // 手动创建节点
-    // 敌人节点
-    const entity1 = Utils.createNode("woodenSkeleton", this.tileMap);
-    const entity2 = Utils.createNode("woodenSkeleton", this.tileMap);
-    const entity3 = Utils.createNode("woodenSkeleton", this.tileMap);
-    const entity4 = Utils.createNode("ironSkeleton", this.tileMap);
-    // 敌人管理器
-    const woodenSkeletonManager1 = entity1.addComponent(WoodenSkeletonManager);
-    const woodenSkeletonManager2 = entity2.addComponent(WoodenSkeletonManager);
-    const woodenSkeletonManager3 = entity3.addComponent(WoodenSkeletonManager);
-    const ironSkeletonManager4 = entity4.addComponent(IronSkeletonManager);
-    await woodenSkeletonManager1.init({
-      x: 2,
-      y: 2,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.ENEMY_WOODEN_SKELETON,
-    });
-    await woodenSkeletonManager2.init({
-      x: 8,
-      y: 2,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.ENEMY_WOODEN_SKELETON,
-    });
-    await woodenSkeletonManager3.init({
-      x: 8,
-      y: 6,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.ENEMY_WOODEN_SKELETON,
-    });
-
-    await ironSkeletonManager4.init({
-      x: 2,
-      y: 5,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.ENEMY_IRON_SKELETON,
-    });
-    DataManager.instance.enemies = [
-      woodenSkeletonManager1,
-      woodenSkeletonManager2,
-      woodenSkeletonManager3,
-      ironSkeletonManager4,
-    ];
+    const initPromise = [];
+    // 遍历地图数据中的每一个敌人信息
+    for (let i = 0; i < this.level.enemies.length; i++) {
+      const enemyInfo = this.level.enemies[i];
+      // 手动创建节点
+      // 敌人节点
+      const entity = Utils.createNode(enemyInfo.type, this.tileMap);
+      // 敌人管理器
+      let entityManager: WoodenSkeletonManager | IronSkeletonManager;
+      switch (enemyInfo.type) {
+        case ENTITY_TYPE_ENUM.ENEMY_WOODEN_SKELETON:
+          entityManager = entity.addComponent(WoodenSkeletonManager);
+          break;
+        case ENTITY_TYPE_ENUM.ENEMY_IRON_SKELETON:
+          entityManager = entity.addComponent(IronSkeletonManager);
+          break;
+      }
+      initPromise.push(entityManager.init(enemyInfo));
+      DataManager.instance.enemies.push(entityManager);
+    }
+    await Promise.all(initPromise);
   }
 
   // 生成门
@@ -116,50 +91,43 @@ export class BattleManager extends Component {
     const door = Utils.createNode("door", this.tileMap);
     // 门管理器
     const doorManager = door.addComponent(DoorManager);
-    await doorManager.init({
-      x: 7,
-      y: 8,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.DOOR,
-    });
+    await doorManager.init(this.level.door);
 
     DataManager.instance.door = doorManager;
   }
 
   // 生成掉落陷阱
   async generateBurst() {
-    // 手动创建节点
-    // 掉落陷阱节点
-    const burst = Utils.createNode("burst", this.tileMap);
-    // 掉落陷阱管理器
-    const burstManager = burst.addComponent(BurstManager);
-    await burstManager.init({
-      x: 3,
-      y: 9,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.BURST,
-    });
-
-    DataManager.instance.bursts.push(burstManager);
+    const initPromise = [];
+    // 遍历地图数据中的每一个掉落陷阱信息
+    for (let i = 0; i < this.level.bursts.length; i++) {
+      const burstInfo = this.level.bursts[i];
+      // 手动创建节点
+      // 掉落陷阱节点
+      const burst = Utils.createNode("burst", this.tileMap);
+      // 掉落陷阱管理器
+      const burstManager = burst.addComponent(BurstManager);
+      initPromise.push(burstManager.init(burstInfo));
+      DataManager.instance.bursts.push(burstManager);
+    }
+    await Promise.all(initPromise);
   }
 
   // 生成尖刺陷阱
   async generateSpikes() {
-    // 手动创建节点
-    // 尖刺陷阱节点
-    const spikes = Utils.createNode("spikes", this.tileMap);
-    // 尖刺陷阱管理器
-    const spikesManager = spikes.addComponent(SpikesManager);
-    await spikesManager.init({
-      x: 2,
-      y: 9,
-      count: 0,
-      type: ENTITY_TYPE_ENUM.SPIKES_ONE,
-    });
-
-    DataManager.instance.spikes.push(spikesManager);
+    const initPromise = [];
+    // 遍历地图数据中的每一个尖刺陷阱信息
+    for (let i = 0; i < this.level.spikes.length; i++) {
+      const spikesInfo = this.level.spikes[i];
+      // 手动创建节点
+      // 尖刺陷阱节点
+      const spikes = Utils.createNode("spikes", this.tileMap);
+      // 尖刺陷阱管理器
+      const spikesManager = spikes.addComponent(SpikesManager);
+      initPromise.push(spikesManager.init(spikesInfo));
+      DataManager.instance.spikes.push(spikesManager);
+    }
+    await Promise.all(initPromise);
   }
 
   // 生成玩家
@@ -169,18 +137,25 @@ export class BattleManager extends Component {
     const player = Utils.createNode("player", this.tileMap);
     // 玩家管理器
     const playerManager = player.addComponent(PlayerManager);
-    await playerManager.init({
-      x: 2,
-      y: 8,
-      state: ENTITY_STATE_ENUM.IDLE,
-      direction: ENTITY_DIRECTION_ENUM.UP,
-      type: ENTITY_TYPE_ENUM.PLAYER,
-    });
+    await playerManager.init(this.level.player);
     DataManager.instance.player = playerManager;
   }
 
+  canToNextLevel() {
+    const { x: playerX, y: playerY } =
+      DataManager.instance.player;
+    const { x: doorX, y: doorY, state: doorState } = DataManager.instance.door;
+    if (
+      playerX === doorX &&
+      playerY === doorY &&
+      doorState === ENTITY_STATE_ENUM.DEAD
+    ) {
+      EventManager.instance.emit(EVENT_ENUM.NEXT_LEVEL);
+    }
+  }
+
   async initStage() {
-    const level = levels[`level_${DataManager.instance.levelIndex}`];
+    const level = levels[`level${DataManager.instance.levelIndex}`];
 
     if (!level) {
       Utils.error("关卡不存在", level);
@@ -198,7 +173,7 @@ export class BattleManager extends Component {
     await this.generateSpikes();
     await this.generateDoor();
     await this.generatePlayer();
-    // 玩家创建完成, 发送事件, 通知敌人看向玩家
+    // 玩家创建完成, 发送事件, 通知敌人看向玩家,加上参数true, 表示是游戏初始化的阶段
     EventManager.instance.emit(EVENT_ENUM.PLAYER_CREATE_END, true);
   }
 
@@ -211,7 +186,9 @@ export class BattleManager extends Component {
     this.initStage();
   }
 
-  update(deltaTime: number) {}
+  update(deltaTime: number) {
+    this.canToNextLevel();
+  }
 
   onDestroy() {
     // 解绑事件

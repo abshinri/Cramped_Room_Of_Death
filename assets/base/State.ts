@@ -37,12 +37,6 @@ export default class State {
     if(this.fsm.animationComponent?.defaultClip?.name === this.animationClip?.name) return;
     this.fsm.animationComponent.defaultClip = this.animationClip;
     this.fsm.animationComponent.play();
-
-    Utils.info(
-      "State.run()-end this.path,this.fsm.animationComponent ",
-      this.path,
-      this.fsm.animationComponent
-    );
   }
 
   async init() {
