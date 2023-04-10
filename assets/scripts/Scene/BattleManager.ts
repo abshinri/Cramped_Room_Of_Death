@@ -4,6 +4,7 @@ import Utils from "db://assets/scripts/Utils";
 import levels from "../../levels";
 import { ILevel } from "../../interfaces";
 import {
+  DIRECTION_NUMBER_ENUM,
   ENTITY_DIRECTION_ENUM,
   ENTITY_STATE_ENUM,
   ENTITY_TYPE_ENUM,
@@ -21,12 +22,13 @@ import { IronSkeletonManager } from "../IronSkeleton/IronSkeletonManager";
 import { DoorManager } from "../Door/DoorManager";
 import { BurstManager } from "../Burst/BurstManager";
 import { SpikesManager } from "../Spikes/SpikesManager";
+import { SmokeManager } from "../Smoke/SmokeManager";
 
 @ccclass("BattleManager")
 export class BattleManager extends Component {
   level: ILevel;
   tileMap: Node;
-
+  smokes: Node;
   // #region 地图相关
   /**
    * 生成地图
@@ -130,6 +132,36 @@ export class BattleManager extends Component {
     await Promise.all(initPromise);
   }
 
+  // 生成烟雾层
+  async generateSmokeLayer() {
+    this.smokes = Utils.createNode("smokes", this.tileMap);
+  }
+  // 生成烟雾
+  async generateSmoke(x: number, y: number, direction: ENTITY_DIRECTION_ENUM) {
+    // 检查是否已经存在状态为DEAD的烟雾, 如果存在则直接复用
+    const deadSmoke = DataManager.instance.smokes.find(
+      (smoke) => smoke.state === ENTITY_STATE_ENUM.DEAD
+    );
+    if (deadSmoke) {
+      deadSmoke.respawn(x, y, direction);
+    } else {
+      // 手动创建节点
+      // 玩家节点
+      const smoke = Utils.createNode("smoke", this.smokes);
+      // 玩家管理器
+      const smokeManager = smoke.addComponent(SmokeManager);
+      await smokeManager.init({
+        x,
+        y,
+        direction,
+        state: ENTITY_STATE_ENUM.IDLE,
+        type: ENTITY_TYPE_ENUM.SMOKE,
+      });
+
+      DataManager.instance.smokes.push(smokeManager);
+    }
+  }
+
   // 生成玩家
   async generatePlayer() {
     // 手动创建节点
@@ -142,8 +174,7 @@ export class BattleManager extends Component {
   }
 
   canToNextLevel() {
-    const { x: playerX, y: playerY } =
-      DataManager.instance.player;
+    const { x: playerX, y: playerY } = DataManager.instance.player;
     const { x: doorX, y: doorY, state: doorState } = DataManager.instance.door;
     if (
       playerX === doorX &&
@@ -172,6 +203,7 @@ export class BattleManager extends Component {
     await this.generateBurst();
     await this.generateSpikes();
     await this.generateDoor();
+    this.generateSmokeLayer(); // 在玩家角色生成前, 生成烟雾层, 以后的烟雾都放入在内, 保证烟雾在玩家角色之下
     await this.generatePlayer();
     // 玩家创建完成, 发送事件, 通知敌人看向玩家,加上参数true, 表示是游戏初始化的阶段
     EventManager.instance.emit(EVENT_ENUM.PLAYER_CREATE_END, true);
@@ -180,6 +212,8 @@ export class BattleManager extends Component {
   onLoad() {
     // 绑定可以触发下一关的事件
     EventManager.instance.on(EVENT_ENUM.NEXT_LEVEL, this.nextLevel, this);
+    // 开启触发移动烟雾效果
+    EventManager.instance.on(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke, this);
   }
 
   start() {
@@ -193,5 +227,6 @@ export class BattleManager extends Component {
   onDestroy() {
     // 解绑事件
     EventManager.instance.off(EVENT_ENUM.NEXT_LEVEL, this.nextLevel, this);
+    EventManager.instance.off(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke, this);
   }
 }

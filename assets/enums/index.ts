@@ -48,6 +48,8 @@ export enum EVENT_ENUM {
   ENEMY_DEAD = "ENEMY_DEAD",
   /** @member "开门" */
   DOOR_OPEN = "DOOR_OPEN",
+  /** @member "扬起尘土" */
+  SHOW_SMOKE = "SHOW_SMOKE",
 }
 
 /**
@@ -258,6 +260,8 @@ export enum ENTITY_TYPE_ENUM {
   SPIKES_THREE = "SPIKES_THREE",
   /** @member "四尖刺陷阱" */
   SPIKES_FOUR = "SPIKES_FOUR",
+  /** @member "烟雾" */
+  SMOKE = "SMOKE",
 }
 
 /**
@@ -309,4 +313,14 @@ export enum SPIKES_STATE_TO_NUMBER_ENUM {
   FOUR = 4,
   /** @member "五" */
   FIVE = 5,
+}
+
+// 屏幕渐入渐出状态枚举
+export enum SCREEN_FADE_STATE_ENUM {
+  /** @member "无" */
+  IDLE = "IDLE",
+  /** @member "渐入" */
+  FADE_IN = "FADE_IN",
+  /** @member "渐出" */
+  FADE_OUT = "FADE_OUT",
 }

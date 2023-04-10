@@ -2,7 +2,7 @@ import { animation, AnimationClip, Sprite, SpriteFrame } from "cc";
 import ResourceManager from "../runtime/ResourceManager";
 import Utils from "../scripts/Utils";
 import { StateMachine } from "./StateMachine";
-const ANIMATION_SPEED = 1 / 8; // 动画单帧时长(每一帧的时间,单位秒)
+export const ANIMATION_SPEED = 1 / 8; // 动画单帧时长(每一帧的时间,单位秒)
 /**
  * 状态的基础类
  *
@@ -19,11 +19,13 @@ export default class State {
    * @param {StateMachine} fsm 当前的状态机
    * @param {string} path 动画资源路径
    * @param {AnimationClip.WrapMode} [wrapMode = AnimationClip.WrapMode.Normal] 动画播放模式,默认只播放一次
+   * @param {number} [speed = ANIMATION_SPEED] 动画播放速度,默认为1/8
    */
   constructor(
     private fsm: StateMachine, // 当前的状态机引用, 方便拿到实例的动画控制器组件
     private path: string,
-    private wrapMode: AnimationClip.WrapMode = AnimationClip.WrapMode.Normal
+    private wrapMode: AnimationClip.WrapMode = AnimationClip.WrapMode.Normal,
+    private speed: number | null = null
   ) {
     this.init();
   }
@@ -34,7 +36,11 @@ export default class State {
    */
   run() {
     // 动画播放不重复
-    if(this.fsm.animationComponent?.defaultClip?.name === this.animationClip?.name) return;
+    if (
+      this.fsm.animationComponent?.defaultClip?.name ===
+      this.animationClip?.name
+    )
+      return;
     this.fsm.animationComponent.defaultClip = this.animationClip;
     this.fsm.animationComponent.play();
   }
@@ -76,5 +82,8 @@ export default class State {
 
     // 该动画为循环播放
     this.animationClip.wrapMode = this.wrapMode;
+    if (this.speed) {
+      this.animationClip.speed = this.animationClip.speed * this.speed;
+    }
   }
 }

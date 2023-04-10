@@ -396,11 +396,11 @@ export class PlayerManager extends EntityManager {
   /**
    * 根据朝向判断武器前方,侧前方,侧方是否有墙
    *
-   * @param {*} weaponCurrPos
-   * @param {*} weaponNextPos
-   * @returns {*}
+   * @param {Vec2} weaponCurrPos
+   * @param {Vec2} weaponNextPos
+   * @returns {boolean}
    */
-  checkWallTurnableByPos(weaponCurrPos, weaponNextPos) {
+  checkWallTurnableByPos(weaponCurrPos: Vec2, weaponNextPos: Vec2): boolean {
     let checkBlocks = [
       DataManager.instance.tiles[weaponCurrPos.x][weaponCurrPos.y],
       DataManager.instance.tiles[weaponNextPos.x][weaponNextPos.y],
@@ -420,7 +420,7 @@ export class PlayerManager extends EntityManager {
         DataManager.instance.tiles[weaponCurrPos.x][weaponNextPos.y]
       );
     }
-    Utils.log("checkBlocks", checkBlocks);
+
     return checkBlocks.every((block) => block && block.turnable);
   }
 
@@ -462,8 +462,19 @@ export class PlayerManager extends EntityManager {
       }
     }
 
+    // 触发烟雾
+    this.showSmoke(input);
+
     // 触发操作结束事件
     EventManager.instance.emit(EVENT_ENUM.PLAYER_MOVE_END);
+  }
+
+  // 展示人物移动的飘起的灰尘动画
+  showSmoke(input: CONTROL_ENUM) {
+    if (input === CONTROL_ENUM.TURN_LEFT || input === CONTROL_ENUM.TURN_RIGHT)
+      return;
+
+    EventManager.instance.emit(EVENT_ENUM.SHOW_SMOKE, this.x, this.y, input);
   }
 
   // 让角色的坐标根据速度趋近于目标坐标,实现有动画的移动效果
@@ -515,5 +526,9 @@ export class PlayerManager extends EntityManager {
     EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle, this);
     // 当玩家收到攻击时, 直接挂
     EventManager.instance.on(EVENT_ENUM.ATTACK_PLAYER, this.playerDead, this);
+  }
+  onDestroy() {
+    EventManager.instance.off(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle);
+    EventManager.instance.off(EVENT_ENUM.ATTACK_PLAYER, this.playerDead);
   }
 }

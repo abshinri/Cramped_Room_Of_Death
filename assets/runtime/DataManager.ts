@@ -4,6 +4,7 @@ import { BurstManager } from "../scripts/Burst/BurstManager";
 import { DoorManager } from "../scripts/Door/DoorManager";
 import { IronSkeletonManager } from "../scripts/IronSkeleton/IronSkeletonManager";
 import { PlayerManager } from "../scripts/Player/PlayerManager";
+import { SmokeManager } from "../scripts/Smoke/SmokeManager";
 import { SpikesManager } from "../scripts/Spikes/SpikesManager";
 import { TileManager } from "../scripts/Stage/TileManager";
 import { WoodenSkeletonManager } from "../scripts/WoodenSkeleton/WoodenSkeletonManager";
@@ -89,6 +90,13 @@ export default class DataManager extends Singleton {
    * @type {Array<SpikesManager>}
    */
   spikes: Array<SpikesManager> = [];
+
+  /**
+   * 移动烟雾信息
+   *
+   * @type {Array<SmokeManager>}
+   */
+  smokes: Array<SmokeManager> = [];
 
   /**
    * 重置数据

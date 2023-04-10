@@ -40,7 +40,7 @@ export class EntityManager extends Component {
   set direction(value: ENTITY_DIRECTION_ENUM) {
     if (this._direction === value) return;
     this._direction = value;
-    // 设置方向的状态级参数
+    // 设置方向的状态机参数
     this.fsm.setParams(
       FSM_PARAMS_NAME_ENUM.DIRECTION,
       DIRECTION_NUMBER_ENUM[value]
