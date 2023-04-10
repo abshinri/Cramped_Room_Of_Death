@@ -317,10 +317,13 @@ export enum SPIKES_STATE_TO_NUMBER_ENUM {
 
 // 屏幕渐入渐出状态枚举
 export enum SCREEN_FADE_STATE_ENUM {
-  /** @member "无" */
-  IDLE = "IDLE",
-  /** @member "渐入" */
+  /** @member "游戏可见" */
+  VISIBLE = "VISIBLE",
+  /** @member "游戏不可见" */
+  INVISIBLE = "INVISIBLE",
+
+  /** @member "渐入游戏画面" */
   FADE_IN = "FADE_IN",
-  /** @member "渐出" */
+  /** @member "渐出游戏画面" */
   FADE_OUT = "FADE_OUT",
 }

@@ -23,6 +23,7 @@ import { DoorManager } from "../Door/DoorManager";
 import { BurstManager } from "../Burst/BurstManager";
 import { SpikesManager } from "../Spikes/SpikesManager";
 import { SmokeManager } from "../Smoke/SmokeManager";
+import FaderManager from "../../runtime/FaderManager";
 
 @ccclass("BattleManager")
 export class BattleManager extends Component {
@@ -57,8 +58,9 @@ export class BattleManager extends Component {
    *
    */
   clearLevel() {
-    DataManager.instance.reset();
     this.tileMap.destroyAllChildren();
+    this.tileMap.destroy();
+    DataManager.instance.reset();
   }
 
   // 生成敌人
@@ -192,6 +194,9 @@ export class BattleManager extends Component {
       Utils.error("关卡不存在", level);
       return;
     }
+
+    await FaderManager.instance.fadeOut();
+
     this.level = level;
 
     DataManager.instance.map = level.map;
@@ -203,10 +208,13 @@ export class BattleManager extends Component {
     await this.generateBurst();
     await this.generateSpikes();
     await this.generateDoor();
-    this.generateSmokeLayer(); // 在玩家角色生成前, 生成烟雾层, 以后的烟雾都放入在内, 保证烟雾在玩家角色之下
+    await this.generateSmokeLayer(); // 在玩家角色生成前, 生成烟雾层, 以后的烟雾都放入在内, 保证烟雾在玩家角色之下
     await this.generatePlayer();
+
     // 玩家创建完成, 发送事件, 通知敌人看向玩家,加上参数true, 表示是游戏初始化的阶段
     EventManager.instance.emit(EVENT_ENUM.PLAYER_CREATE_END, true);
+
+    await FaderManager.instance.fadeIn();
   }
 
   onLoad() {
