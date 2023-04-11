@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, UITransform } from "cc";
+import { _decorator, Component, Node, UITransform, utils } from "cc";
 const { ccclass, property } = _decorator;
 import Utils from "db://assets/scripts/Utils";
 import levels from "../../levels";
@@ -49,7 +49,7 @@ export class BattleManager extends Component {
    */
   nextLevel() {
     this.clearLevel();
-    DataManager.instance.levelIndex++;
+    DataManager.instance.levelIndex = DataManager.instance.levelIndex + 1;
     this.initStage();
   }
 
@@ -85,6 +85,7 @@ export class BattleManager extends Component {
       initPromise.push(entityManager.init(enemyInfo));
       DataManager.instance.enemies.push(entityManager);
     }
+    
     await Promise.all(initPromise);
   }
 
@@ -189,7 +190,6 @@ export class BattleManager extends Component {
 
   async initStage() {
     const level = levels[`level${DataManager.instance.levelIndex}`];
-
     if (!level) {
       Utils.error("关卡不存在", level);
       return;
@@ -210,6 +210,8 @@ export class BattleManager extends Component {
     await this.generateDoor();
     await this.generateSmokeLayer(); // 在玩家角色生成前, 生成烟雾层, 以后的烟雾都放入在内, 保证烟雾在玩家角色之下
     await this.generatePlayer();
+
+    Utils.info("initStage 加载完之后 DataManager.instance", DataManager.instance);
 
     // 玩家创建完成, 发送事件, 通知敌人看向玩家,加上参数true, 表示是游戏初始化的阶段
     EventManager.instance.emit(EVENT_ENUM.PLAYER_CREATE_END, true);

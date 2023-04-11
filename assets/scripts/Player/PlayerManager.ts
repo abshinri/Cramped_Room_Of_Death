@@ -24,17 +24,19 @@ export class PlayerManager extends EntityManager {
    * 基类EntityManager包含的x,y是用于控制角色的位移动画的
    * 在实际的数据建模中, 角色的位置是以角色的建模坐标target为准的
    */
-  realX: number = 2; // 主角的目标横向位置(实际为角色的建模坐标)
-  realY: number = 8; // 主角的目标纵向位置(实际为角色的建模坐标),+为向上,-为向下
+  realX: number = 0; // 主角的目标横向位置(实际为角色的建模坐标)
+  realY: number = 0; // 主角的目标纵向位置(实际为角色的建模坐标),+为向上,-为向下
   isMoving: boolean = false; // 主角是否正在移动
   private readonly speed = 1 / 10; // 主角移动速度
 
   inputHandle(input: CONTROL_ENUM) {
+    Utils.info("inputHandle input,this", input, this);
     // 如果当前状态不是idle, 则不处理输入
     if (
       this.fsm.currentState !=
       this.fsm.stateMachines.get(FSM_PARAMS_NAME_ENUM.IDLE)
     ) {
+      Utils.info("inputHandle-return 状态不是idle");
       return;
     }
 
@@ -42,6 +44,8 @@ export class PlayerManager extends EntityManager {
     if (enemyId) {
       EventManager.instance.emit(EVENT_ENUM.ENEMY_DEAD, enemyId);
       EventManager.instance.emit(EVENT_ENUM.DOOR_OPEN);
+
+      Utils.info("inputHandle-return 攻击敌人");
       return;
     }
 
@@ -172,25 +176,37 @@ export class PlayerManager extends EntityManager {
       /** 向上移动 */
       const moveVec = new Vec2(0, -1);
       playerNextPos.add(moveVec);
-      if (playerNextPos.y < 0) return true; // 上方超出地图边界, 无法移动
+      if (playerNextPos.y < 0) {
+        Utils.info("willBlock", "上方超出地图边界, 无法移动");
+        return true; // 上方超出地图边界, 无法移动
+      }
       weaponNextPos.set(weaponCurrPos).add(moveVec);
     } else if (input === CONTROL_ENUM.DOWN) {
       /** 向下移动 */
       const moveVec = new Vec2(0, 1);
       playerNextPos.add(moveVec);
-      if (playerNextPos.y > tiles[0]?.length) return true; // 下方超出地图边界, 无法移动
+      if (playerNextPos.y > tiles[0]?.length) {
+        Utils.info("willBlock", "下方超出地图边界, 无法移动");
+        return true; // 下方超出地图边界, 无法移动
+      }
       weaponNextPos.set(weaponCurrPos).add(moveVec);
     } else if (input === CONTROL_ENUM.LEFT) {
       /** 向左移动 */
       const moveVec = new Vec2(-1, 0);
       playerNextPos.add(moveVec);
-      if (playerNextPos.x < 0) return true; // 左方超出地图边界, 无法移动
+      if (playerNextPos.x < 0) {
+        Utils.info("willBlock", "左方超出地图边界, 无法移动");
+        return true; // 左方超出地图边界, 无法移动
+      }
       weaponNextPos.set(weaponCurrPos).add(moveVec);
     } else if (input === CONTROL_ENUM.RIGHT) {
       /** 向右移动 */
       const moveVec = new Vec2(1, 0);
       playerNextPos.add(moveVec);
-      if (playerNextPos.x > tiles.length) return true; // 右方超出地图边界, 无法移动
+      if (playerNextPos.x > tiles.length) {
+        Utils.info("willBlock", "右方超出地图边界, 无法移动");
+        return true; // 右方超出地图边界, 无法移动
+      }
       weaponNextPos.set(weaponCurrPos).add(moveVec);
     } else if (input === CONTROL_ENUM.TURN_LEFT) {
       /**
@@ -239,6 +255,7 @@ export class PlayerManager extends EntityManager {
       /** 判断是否能移动到目标位置, 不能则播放撞墙动画 */
       const canMove = this.canMoveToTargetByPos(playerNextPos, weaponNextPos);
       if (canMove) {
+        Utils.info("willBlock", "无法移动到目标");
         return false;
       } else {
         this.state = ENTITY_DIRECTION_TO_BLOCK_ENUM[this.direction];
@@ -252,6 +269,7 @@ export class PlayerManager extends EntityManager {
       /** 判断是否能转向到目标位置, 不能则播放撞墙动画 */
       const canTurn = this.canTurnToTargetByPos(weaponCurrPos, weaponNextPos);
       if (canTurn) {
+        Utils.info("willBlock", "无法转向到目标");
         return false;
       } else {
         this.state = ENTITY_DIRECTION_TO_BLOCK_ENUM[input];
@@ -310,6 +328,7 @@ export class PlayerManager extends EntityManager {
         this.haveEntityByPos(weaponNextPos, door))
     ) {
       // 门
+      Utils.info("canMoveToTargetByPos-false 门");
       return false;
     } else if (
       enemies &&
@@ -317,6 +336,7 @@ export class PlayerManager extends EntityManager {
         enemies.some((enemy) => this.haveEntityByPos(weaponNextPos, enemy)))
     ) {
       // 敌人
+      Utils.info("canMoveToTargetByPos-false 敌人");
       return false;
     } else if (
       !(
@@ -337,6 +357,7 @@ export class PlayerManager extends EntityManager {
         return true;
       } else {
         // 有墙和悬崖
+        Utils.info("canMoveToTargetByPos-false 有墙和悬崖");
         return false;
       }
     } else {
@@ -429,17 +450,22 @@ export class PlayerManager extends EntityManager {
     if (input === CONTROL_ENUM.UP) {
       this.realY -= 1;
       this.isMoving = true;
+      Utils.info("move 上");
     } else if (input === CONTROL_ENUM.DOWN) {
       this.realY += 1;
       this.isMoving = true;
+      Utils.info("move 下");
     } else if (input === CONTROL_ENUM.LEFT) {
       this.realX -= 1;
       this.isMoving = true;
+      Utils.info("move 左");
     } else if (input === CONTROL_ENUM.RIGHT) {
       this.realX += 1;
       this.isMoving = true;
+      Utils.info("move 右");
     } else if (input === CONTROL_ENUM.TURN_LEFT) {
       this.state = ENTITY_STATE_ENUM.TURN_LEFT;
+      Utils.info("move 左转");
       if (this.direction === ENTITY_DIRECTION_ENUM.UP) {
         this.direction = ENTITY_DIRECTION_ENUM.LEFT;
       } else if (this.direction === ENTITY_DIRECTION_ENUM.LEFT) {
@@ -451,6 +477,7 @@ export class PlayerManager extends EntityManager {
       }
     } else if (input === CONTROL_ENUM.TURN_RIGHT) {
       this.state = ENTITY_STATE_ENUM.TURN_RIGHT;
+      Utils.info("move 右转");
       if (this.direction === ENTITY_DIRECTION_ENUM.UP) {
         this.direction = ENTITY_DIRECTION_ENUM.RIGHT;
       } else if (this.direction === ENTITY_DIRECTION_ENUM.LEFT) {
@@ -518,17 +545,27 @@ export class PlayerManager extends EntityManager {
   async init(params: IEntity) {
     // 加载玩家角色的状态机
     this.fsm = this.addComponent(PlayerStateMachine);
+    Utils.info("player init-fsm.init前 this", this);
     await this.fsm.init();
 
-    super.init(params);
+    Utils.info("player init-fsm.init后 this", this);
 
+    super.init(params);
+    this.realX = this.x;
+    this.realY = this.y;
+
+    Utils.info("player init-super.init后 this", this);
     // 当玩家按下操作按钮时, 触发move事件
     EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle, this);
     // 当玩家收到攻击时, 直接挂
     EventManager.instance.on(EVENT_ENUM.ATTACK_PLAYER, this.playerDead, this);
   }
   onDestroy() {
-    EventManager.instance.off(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle);
-    EventManager.instance.off(EVENT_ENUM.ATTACK_PLAYER, this.playerDead);
+    EventManager.instance.off(
+      EVENT_ENUM.PLAYER_CONTROL,
+      this.inputHandle,
+      this
+    );
+    EventManager.instance.off(EVENT_ENUM.ATTACK_PLAYER, this.playerDead, this);
   }
 }

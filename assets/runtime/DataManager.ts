@@ -54,7 +54,7 @@ export default class DataManager extends Singleton {
    *
    * @type {number}
    */
-  levelIndex: number = 1;
+  levelIndex: number = 2;
 
   /**
    * 玩家信息
@@ -106,7 +106,6 @@ export default class DataManager extends Singleton {
     this.map = [];
     this.mapRowCount = 0;
     this.mapCol = 0;
-    this.levelIndex = 1;
     this.tiles = [];
     this.player = null;
     this.enemies = [];

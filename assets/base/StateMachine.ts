@@ -71,6 +71,7 @@ export abstract class StateMachine extends Component {
    * @param {(boolean | number)} value
    */
   setParams(paramsName: string, value: boolean | number) {
+    Utils.info("setParams this,paramsName,value", this, paramsName, value);
     if (this.params.has(paramsName)) {
       this.params.get(paramsName).value = value;
       this.run();

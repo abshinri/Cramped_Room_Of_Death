@@ -70,63 +70,67 @@ export class PlayerStateMachine extends StateMachine {
    *
    */
   initStateMachines() {
-    /** 站立动画状态机 */
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.IDLE,
-      new IdleSubStateMachine(this)
-    );
-    /** 左转动画状态机 */
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.TURN_LEFT,
-      new TurnLeftSubStateMachine(this)
-    );
-    /** 右转动画状态机 */
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.TURN_RIGHT,
-      new TurnRightSubStateMachine(this)
-    );
+    try {
+      /** 站立动画状态机 */
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.IDLE,
+        new IdleSubStateMachine(this)
+      );
+      /** 左转动画状态机 */
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.TURN_LEFT,
+        new TurnLeftSubStateMachine(this)
+      );
+      /** 右转动画状态机 */
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.TURN_RIGHT,
+        new TurnRightSubStateMachine(this)
+      );
 
-    /** 碰撞动画状态机 */
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.BLOCK_UP,
-      new BlockUpSubStateMachine(this)
-    );
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.BLOCK_DOWN,
-      new BlockDownSubStateMachine(this)
-    );
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.BLOCK_LEFT,
-      new BlockLeftSubStateMachine(this)
-    );
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.BLOCK_RIGHT,
-      new BlockRightSubStateMachine(this)
-    );
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT,
-      new BlockTurnLeftSubStateMachine(this)
-    );
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.BLOCK_TURN_RIGHT,
-      new BlockTurnRightSubStateMachine(this)
-    );
+      /** 碰撞动画状态机 */
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.BLOCK_UP,
+        new BlockUpSubStateMachine(this)
+      );
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.BLOCK_DOWN,
+        new BlockDownSubStateMachine(this)
+      );
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.BLOCK_LEFT,
+        new BlockLeftSubStateMachine(this)
+      );
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.BLOCK_RIGHT,
+        new BlockRightSubStateMachine(this)
+      );
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.BLOCK_TURN_LEFT,
+        new BlockTurnLeftSubStateMachine(this)
+      );
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.BLOCK_TURN_RIGHT,
+        new BlockTurnRightSubStateMachine(this)
+      );
 
-    /** 攻击动画状态机 */
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.ATTACK,
-      new AttackSubStateMachine(this)
-    );
+      /** 攻击动画状态机 */
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.ATTACK,
+        new AttackSubStateMachine(this)
+      );
 
-    /** 死亡动画状态机 */
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.DEAD,
-      new DeadSubStateMachine(this)
-    );
-    this.stateMachines.set(
-      FSM_PARAMS_NAME_ENUM.AIRDEAD,
-      new DeadAirSubStateMachine(this)
-    );
+      /** 死亡动画状态机 */
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.DEAD,
+        new DeadSubStateMachine(this)
+      );
+      this.stateMachines.set(
+        FSM_PARAMS_NAME_ENUM.AIRDEAD,
+        new DeadAirSubStateMachine(this)
+      );
+    } catch (error) {
+      Utils.warn(error);
+    }
   }
 
   /**

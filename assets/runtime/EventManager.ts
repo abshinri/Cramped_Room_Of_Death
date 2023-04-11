@@ -35,6 +35,8 @@ export default class EventManager extends Singleton {
       // 如果有该事件列表名,则直接将事件放到对应的事件列表里
       this.eventMap.get(eventName).push({ callback, ctx });
     }
+    Utils.info("注册事件", eventName, callback, ctx);
+    Utils.info("eventMap", this.eventMap);
   }
 
   /**
@@ -49,11 +51,15 @@ export default class EventManager extends Singleton {
     // 如果没有该事件列表名,则无视
     if (!this.eventMap.has(eventName)) return;
     // 如果有该事件列表名,则将事件从对应的事件列表里移除
+    // TODO:梳理此处的逻辑
     const callbacks = this.eventMap.get(eventName);
-    const index = callbacks.indexOf({ callback, ctx });
+    const index = callbacks.findIndex(i => callback === i.callback);
     if (index !== -1) {
       callbacks.splice(index, 1);
     }
+    this.eventMap.set(eventName, callbacks);
+    Utils.info("注销事件", eventName, callback, ctx);
+    Utils.info("eventMap", this.eventMap);
   }
 
   /**

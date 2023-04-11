@@ -25,7 +25,6 @@ export class EnemyManager extends EntityManager {
     );
 
     EventManager.instance.on(EVENT_ENUM.ENEMY_DEAD, this.dead, this);
-    this.changeDirectionToPlayer(true);
   }
 
   /**
