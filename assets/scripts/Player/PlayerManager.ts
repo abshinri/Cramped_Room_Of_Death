@@ -49,9 +49,20 @@ export class PlayerManager extends EntityManager {
       return;
     }
 
-    if (this.willBlock(input)) return;
+    if (this.willBlock(input)) {
+      EventManager.instance.emit(
+        EVENT_ENUM.SCREEN_SHAKE,
+        this.direction,
+        input
+      );
+      return;
+    }
 
     this.move(input);
+  }
+
+  onAttackShake(input) {
+    EventManager.instance.emit(EVENT_ENUM.SCREEN_SHAKE, this.direction, input);
   }
 
   /**
@@ -523,8 +534,8 @@ export class PlayerManager extends EntityManager {
 
     // 坐标近似时就结束移动, 避免出现精度问题
     if (
-      Math.abs(this.realX - this.x) < 0.01 &&
-      Math.abs(this.realY - this.y) < 0.01
+      Math.abs(this.realX - this.x) < 0.1 &&
+      Math.abs(this.realY - this.y) < 0.1
     ) {
       this.isMoving = false;
       this.x = this.realX;
@@ -545,16 +556,12 @@ export class PlayerManager extends EntityManager {
   async init(params: IEntity) {
     // 加载玩家角色的状态机
     this.fsm = this.addComponent(PlayerStateMachine);
-    Utils.info("player init-fsm.init前 this", this);
     await this.fsm.init();
-
-    Utils.info("player init-fsm.init后 this", this);
 
     super.init(params);
     this.realX = this.x;
     this.realY = this.y;
 
-    Utils.info("player init-super.init后 this", this);
     // 当玩家按下操作按钮时, 触发move事件
     EventManager.instance.on(EVENT_ENUM.PLAYER_CONTROL, this.inputHandle, this);
     // 当玩家收到攻击时, 直接挂

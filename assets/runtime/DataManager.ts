@@ -54,7 +54,7 @@ export default class DataManager extends Singleton {
    *
    * @type {number}
    */
-  levelIndex: number = 2;
+  levelIndex: number = 1;
 
   /**
    * 玩家信息

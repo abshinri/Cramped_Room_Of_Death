@@ -25,7 +25,8 @@ export default class State {
     private fsm: StateMachine, // 当前的状态机引用, 方便拿到实例的动画控制器组件
     private path: string,
     private wrapMode: AnimationClip.WrapMode = AnimationClip.WrapMode.Normal,
-    private speed: number | null = null
+    private speed: number | null = null,
+    private event: AnimationClip.IEvent[] = [] // 用于储存动画的帧事件
   ) {
     this.init();
   }
@@ -82,6 +83,9 @@ export default class State {
 
     // 该动画为循环播放
     this.animationClip.wrapMode = this.wrapMode;
+
+    this.animationClip.events = this.event;
+
     if (this.speed) {
       this.animationClip.speed = this.animationClip.speed * this.speed;
     }

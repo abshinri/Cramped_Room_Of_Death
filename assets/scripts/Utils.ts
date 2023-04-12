@@ -112,6 +112,10 @@ export default class Utils {
     this.console(CONSOLE_METHODS.LOG, title, ...args);
   }
 
+  static debug(title: string, ...args: any[]) {
+    this.console(CONSOLE_METHODS.LOG, `DEBUG - ${title}`, ...args);
+  }
+
   static info(title: string, ...args: any[]) {
     this.console(CONSOLE_METHODS.INFO, title, ...args);
   }

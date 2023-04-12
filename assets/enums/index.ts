@@ -50,6 +50,9 @@ export enum EVENT_ENUM {
   DOOR_OPEN = "DOOR_OPEN",
   /** @member "扬起尘土" */
   SHOW_SMOKE = "SHOW_SMOKE",
+
+  /** @member "屏幕震动" */
+  SCREEN_SHAKE = "SCREEN_SHAKE",
 }
 
 /**

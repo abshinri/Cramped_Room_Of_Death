@@ -24,6 +24,7 @@ import { BurstManager } from "../Burst/BurstManager";
 import { SpikesManager } from "../Spikes/SpikesManager";
 import { SmokeManager } from "../Smoke/SmokeManager";
 import FaderManager from "../../runtime/FaderManager";
+import { ShakeManager } from "../UI/ShakeManager";
 
 @ccclass("BattleManager")
 export class BattleManager extends Component {
@@ -39,6 +40,11 @@ export class BattleManager extends Component {
     // 手动创建节点
     // 地图节点
     this.tileMap = Utils.createNode("tileMap", this.node);
+
+    // 添加震动控制器
+    const shakeManager = this.tileMap.addComponent(ShakeManager);
+    shakeManager.init();
+    
     const mapManager = this.tileMap.addComponent(MapManager);
     await mapManager.init();
   }
@@ -85,7 +91,7 @@ export class BattleManager extends Component {
       initPromise.push(entityManager.init(enemyInfo));
       DataManager.instance.enemies.push(entityManager);
     }
-    
+
     await Promise.all(initPromise);
   }
 
@@ -210,8 +216,6 @@ export class BattleManager extends Component {
     await this.generateDoor();
     await this.generateSmokeLayer(); // 在玩家角色生成前, 生成烟雾层, 以后的烟雾都放入在内, 保证烟雾在玩家角色之下
     await this.generatePlayer();
-
-    Utils.info("initStage 加载完之后 DataManager.instance", DataManager.instance);
 
     // 玩家创建完成, 发送事件, 通知敌人看向玩家,加上参数true, 表示是游戏初始化的阶段
     EventManager.instance.emit(EVENT_ENUM.PLAYER_CREATE_END, true);

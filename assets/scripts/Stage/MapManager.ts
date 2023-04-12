@@ -13,6 +13,7 @@ import Utils from "db://assets/scripts/Utils";
 import { TileManager } from "./TileManager";
 import DataManager from "../../runtime/DataManager";
 import ResourceManager from "../../runtime/ResourceManager";
+import { ShakeManager } from "../UI/ShakeManager";
 
 // 砖块宽高
 export const TILE_WIDTH = 55;
@@ -27,7 +28,12 @@ export class MapManager extends Component {
   centerTileMap() {
     const { mapRowCount, mapCol } = DataManager.instance;
     const x = -(mapCol * 55) / 2;
-    const y = (mapRowCount * 55) / 2 + 80;
+    const y = (mapRowCount * 55) / 2 + 120;
+
+    // 初始化地图的时候确保画面没有在震动
+    const shakeManager = this.node.getComponent(ShakeManager);
+    shakeManager.stopShake();
+    
     this.node.setPosition(x, y);
   }
 
@@ -53,7 +59,7 @@ export class MapManager extends Component {
     // map[i][j]则依次是从上到下的每一个砖块的数据
     DataManager.instance.map.forEach((col, colIndex) => {
       DataManager.instance.tiles[colIndex] = [];
-      
+
       col.forEach((tile, tileIndex) => {
         // 如果砖块类型或者砖块图片索引不存在，则不生成砖块
         if (!tile.type || !tile.src) {

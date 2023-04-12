@@ -1,5 +1,10 @@
 import { UITransform, _decorator } from "cc";
-import { EVENT_ENUM, ENTITY_STATE_ENUM } from "../../enums";
+import {
+  EVENT_ENUM,
+  ENTITY_STATE_ENUM,
+  ENTITY_DIRECTION_ENUM,
+  CONTROL_ENUM,
+} from "../../enums";
 import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
 import { BurstStateMachine } from "./BurstStateMachine";
@@ -44,8 +49,19 @@ export class BurstManager extends EntityManager {
     }
 
     // 如果和玩家坐标重叠
-    if (this.x === playerX && this.y === playerY && playerState === ENTITY_STATE_ENUM.IDLE) {
+    if (
+      this.x === playerX &&
+      this.y === playerY &&
+      playerState === ENTITY_STATE_ENUM.IDLE
+    ) {
       if (this.state === ENTITY_STATE_ENUM.ATTACK) {
+        // 碎裂时触发震动
+        EventManager.instance.emit(
+          EVENT_ENUM.SCREEN_SHAKE,
+          ENTITY_DIRECTION_ENUM.DOWN,
+          CONTROL_ENUM.DOWN
+        );
+
         // 如果已经碎裂,触发彻底碎裂
         this.state = ENTITY_STATE_ENUM.DEAD;
         // 同时玩家掉落死亡
@@ -56,7 +72,6 @@ export class BurstManager extends EntityManager {
       } else {
         // 如果没有彻底碎裂,开始碎裂
         this.state = ENTITY_STATE_ENUM.ATTACK;
-
       }
     }
   }
