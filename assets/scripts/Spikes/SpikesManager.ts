@@ -24,7 +24,7 @@ export class SpikesManager extends Component {
 
   private _count: number; // 尖刺状态
   private _totalCount: number; // 尖刺类型, 不同的尖刺总数就有不同的尖刺类型
-  private type: ENTITY_TYPE_ENUM; // 实体的类型
+  type: ENTITY_TYPE_ENUM; // 实体的类型
 
   get count() {
     return this._count;

@@ -2,7 +2,7 @@ import { _decorator, Component, Node, UITransform, utils } from "cc";
 const { ccclass, property } = _decorator;
 import Utils from "db://assets/scripts/Utils";
 import levels from "../../levels";
-import { ILevel } from "../../interfaces";
+import { ILevel, IRecord } from "../../interfaces";
 import {
   DIRECTION_NUMBER_ENUM,
   ENTITY_DIRECTION_ENUM,
@@ -44,7 +44,7 @@ export class BattleManager extends Component {
     // 添加震动控制器
     const shakeManager = this.tileMap.addComponent(ShakeManager);
     shakeManager.init();
-    
+
     const mapManager = this.tileMap.addComponent(MapManager);
     await mapManager.init();
   }
@@ -223,11 +223,131 @@ export class BattleManager extends Component {
     await FaderManager.instance.fadeIn();
   }
 
+  /**
+   * 保存当前游戏状态
+   *
+   */
+  record() {
+    const item: IRecord = {
+      player: {
+        x: DataManager.instance.player.x,
+        y: DataManager.instance.player.y,
+        direction: DataManager.instance.player.direction,
+        state: DataManager.instance.player.state as ENTITY_STATE_ENUM,
+        type: DataManager.instance.player.type,
+      },
+      door: {
+        x: DataManager.instance.door.x,
+        y: DataManager.instance.door.y,
+        direction: DataManager.instance.door.direction,
+        state: DataManager.instance.door.state as ENTITY_STATE_ENUM,
+        type: DataManager.instance.door.type,
+      },
+      enemies: DataManager.instance.enemies.map((enemy) => {
+        return {
+          x: enemy.x,
+          y: enemy.y,
+          direction: enemy.direction,
+          state: enemy.state as ENTITY_STATE_ENUM,
+          type: enemy.type,
+        };
+      }),
+      bursts: DataManager.instance.bursts.map((burst) => {
+        return {
+          x: burst.x,
+          y: burst.y,
+          direction: burst.direction,
+          state: burst.state as ENTITY_STATE_ENUM,
+          type: burst.type,
+        };
+      }),
+      spikes: DataManager.instance.spikes.map((spike) => {
+        return {
+          x: spike.x,
+          y: spike.y,
+          count: spike.count,
+          type: spike.type,
+        };
+      }),
+    };
+    DataManager.instance.record.push(item);
+  }
+
+  /**
+   * 游戏撤回
+   *
+   */
+  revoke() {
+    // 取出最后一条记录
+    const record = DataManager.instance.record.pop();
+    if (record) {
+      // 撤回玩家状态
+      DataManager.instance.player.x = DataManager.instance.player.realX =
+        record.player.x;
+      DataManager.instance.player.y = DataManager.instance.player.realY =
+        record.player.y;
+      DataManager.instance.player.direction = record.player.direction;
+      // 玩家只记录死和站立的状态
+      if (
+        record.player.state === ENTITY_STATE_ENUM.DEAD ||
+        record.player.state === ENTITY_STATE_ENUM.AIRDEAD
+      ) {
+        DataManager.instance.player.state === record.player.state;
+      } else {
+        DataManager.instance.player.state === ENTITY_STATE_ENUM.IDLE;
+      }
+      DataManager.instance.player.type = record.player.type;
+
+      // 撤回门状态
+      DataManager.instance.door.x = record.door.x;
+      DataManager.instance.door.y = record.door.y;
+      DataManager.instance.door.direction = record.door.direction;
+      DataManager.instance.door.state = record.door.state;
+      DataManager.instance.door.type = record.door.type;
+
+      // 撤回敌人状态
+      for (let i = 0; i < record.enemies.length; i++) {
+        const enemy = record.enemies[i];
+        const enemyManager = DataManager.instance.enemies[i];
+        enemyManager.x = enemy.x;
+        enemyManager.y = enemy.y;
+        enemyManager.direction = enemy.direction;
+        enemyManager.state = enemy.state;
+        enemyManager.type = enemy.type;
+      }
+
+      // 撤回陷阱状态
+      for (let i = 0; i < record.bursts.length; i++) {
+        const burst = record.bursts[i];
+        const burstManager = DataManager.instance.bursts[i];
+        burstManager.x = burst.x;
+        burstManager.y = burst.y;
+        burstManager.direction = burst.direction;
+        burstManager.state = burst.state;
+        burstManager.type = burst.type;
+      }
+
+      // 撤回尖刺状态
+      for (let i = 0; i < record.spikes.length; i++) {
+        const spike = record.spikes[i];
+        const spikeManager = DataManager.instance.spikes[i];
+        spikeManager.x = spike.x;
+        spikeManager.y = spike.y;
+        spikeManager.count = spike.count;
+        spikeManager.type = spike.type;
+      }
+    }
+  }
+
   onLoad() {
     // 绑定可以触发下一关的事件
     EventManager.instance.on(EVENT_ENUM.NEXT_LEVEL, this.nextLevel, this);
     // 开启触发移动烟雾效果
     EventManager.instance.on(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke, this);
+
+    // 触发游戏记录和撤回事件
+    EventManager.instance.on(EVENT_ENUM.RECORD, this.record, this);
+    EventManager.instance.on(EVENT_ENUM.REVOKE, this.revoke, this);
   }
 
   start() {
@@ -242,5 +362,7 @@ export class BattleManager extends Component {
     // 解绑事件
     EventManager.instance.off(EVENT_ENUM.NEXT_LEVEL, this.nextLevel, this);
     EventManager.instance.off(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke, this);
+    EventManager.instance.off(EVENT_ENUM.RECORD, this.record, this);
+    EventManager.instance.off(EVENT_ENUM.REVOKE, this.revoke, this);
   }
 }

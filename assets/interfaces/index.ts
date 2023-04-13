@@ -107,6 +107,11 @@ export interface ILevel {
 }
 
 /**
+ * 类型：当前关卡信息
+ */
+export type IRecord = Omit<ILevel, "map">;
+
+/**
  * 接口：状态机参数值
  *
  * @export

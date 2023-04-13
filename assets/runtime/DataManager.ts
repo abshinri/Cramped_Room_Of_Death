@@ -1,5 +1,5 @@
 import Singleton from "../base/Singleton";
-import { ITile } from "../interfaces";
+import { IRecord, ITile } from "../interfaces";
 import { BurstManager } from "../scripts/Burst/BurstManager";
 import { DoorManager } from "../scripts/Door/DoorManager";
 import { IronSkeletonManager } from "../scripts/IronSkeleton/IronSkeletonManager";
@@ -98,6 +98,13 @@ export default class DataManager extends Singleton {
    */
   smokes: Array<SmokeManager> = [];
 
+
+  /**
+   * 当前关卡的记录信息
+   *
+   * @type {Array<IRecord>}
+   */
+  record:Array<IRecord> = []
   /**
    * 重置数据
    *
@@ -112,5 +119,7 @@ export default class DataManager extends Singleton {
     this.door = null;
     this.bursts = [];
     this.spikes = [];
+    this.smokes = [];
+    this.record = [];
   }
 }

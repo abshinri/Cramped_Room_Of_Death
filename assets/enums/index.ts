@@ -53,6 +53,11 @@ export enum EVENT_ENUM {
 
   /** @member "屏幕震动" */
   SCREEN_SHAKE = "SCREEN_SHAKE",
+
+  /** @member "记录操作" */
+  RECORD = "RECORD",
+  /** @member "撤销操作" */
+  REVOKE = "REVOKE",
 }
 
 /**

@@ -1,9 +1,4 @@
-import {
-  _decorator,
-  Component,
-  Sprite,
-  UITransform,
-} from "cc";
+import { _decorator, Component, Sprite, UITransform } from "cc";
 import {
   FSM_PARAMS_NAME_ENUM,
   ENTITY_DIRECTION_ENUM,
@@ -27,7 +22,7 @@ export class EntityManager extends Component {
 
   private _direction: ENTITY_DIRECTION_ENUM; // 实体的朝向
   private _state: ENTITY_STATE_ENUM | ENTITY_DIRECTION_TO_BLOCK_ENUM; // 实体的状态
-  private type: ENTITY_TYPE_ENUM; // 实体的类型
+  type: ENTITY_TYPE_ENUM; // 实体的类型
 
   get direction() {
     return this._direction;

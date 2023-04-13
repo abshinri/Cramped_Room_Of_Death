@@ -42,8 +42,11 @@ export class PlayerManager extends EntityManager {
 
     const enemyId = this.willAttackGetEnemyId(input);
     if (enemyId) {
+      // 记录游戏状态
+      EventManager.instance.emit(EVENT_ENUM.RECORD);
       EventManager.instance.emit(EVENT_ENUM.ENEMY_DEAD, enemyId);
       EventManager.instance.emit(EVENT_ENUM.DOOR_OPEN);
+      EventManager.instance.emit(EVENT_ENUM.PLAYER_MOVE_END);
 
       Utils.info("inputHandle-return 攻击敌人");
       return;
@@ -458,6 +461,8 @@ export class PlayerManager extends EntityManager {
 
   // 控制角色移动
   move(input: CONTROL_ENUM) {
+    // 记录游戏状态
+    EventManager.instance.emit(EVENT_ENUM.RECORD);
     if (input === CONTROL_ENUM.UP) {
       this.realY -= 1;
       this.isMoving = true;
