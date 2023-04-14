@@ -31,11 +31,15 @@ export default class FaderManager extends Singleton {
     return this._fader;
   }
 
-  fadeIn() {
-    return this.fader.fadeIn();
+  fadeIn(duration: number = 200) {
+    return this.fader.fadeIn(duration);
   }
 
-  fadeOut() {
-    return this.fader.fadeOut();
+  fadeOut(duration: number = 200) {
+    return this.fader.fadeOut(duration);
+  }
+  
+  mask(duration: number = 200) {
+    return this.fader.mask(duration);
   }
 }

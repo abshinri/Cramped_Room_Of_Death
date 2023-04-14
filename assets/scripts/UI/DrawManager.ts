@@ -90,11 +90,11 @@ export class DrawManager extends Component {
     });
   }
 
-  mask() {
+  mask(duration: number = FADE_DURATION) {
     this._state = SCREEN_FADE_STATE_ENUM.INVISIBLE;
     this.setAlpha(1);
     return new Promise((resolve) => {
-      setTimeout(resolve, FADE_DURATION);
+      setTimeout(resolve, duration);
     });
   }
 

@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, UITransform, utils } from "cc";
+import { _decorator, Component, director, Node, UITransform, utils } from "cc";
 const { ccclass, property } = _decorator;
 import Utils from "db://assets/scripts/Utils";
 import levels from "../../levels";
@@ -9,6 +9,7 @@ import {
   ENTITY_STATE_ENUM,
   ENTITY_TYPE_ENUM,
   EVENT_ENUM,
+  SCENE_ENUM,
   SPIKES_STATE_ENUM,
 } from "../../enums";
 
@@ -31,6 +32,7 @@ export class BattleManager extends Component {
   level: ILevel;
   tileMap: Node;
   smokes: Node;
+  private inited: boolean = false;
   // #region 地图相关
   /**
    * 生成地图
@@ -198,10 +200,16 @@ export class BattleManager extends Component {
     const level = levels[`level${DataManager.instance.levelIndex}`];
     if (!level) {
       Utils.error("关卡不存在", level);
+      this.outGame();
       return;
     }
-
-    await FaderManager.instance.fadeOut();
+    if (this.inited) {
+      // 切换关卡时先淡出
+      await FaderManager.instance.fadeOut();
+    } else {
+      // 初次载入关卡保持黑屏
+      await FaderManager.instance.mask();
+    }
 
     this.level = level;
 
@@ -220,7 +228,9 @@ export class BattleManager extends Component {
     // 玩家创建完成, 发送事件, 通知敌人看向玩家,加上参数true, 表示是游戏初始化的阶段
     EventManager.instance.emit(EVENT_ENUM.PLAYER_CREATE_END, true);
 
+    // 加载完成后淡入
     await FaderManager.instance.fadeIn();
+    this.inited = true;
   }
 
   /**
@@ -338,7 +348,11 @@ export class BattleManager extends Component {
       }
     }
   }
-
+  // 退出游戏
+  async outGame() {
+    await FaderManager.instance.fadeOut();
+    director.loadScene(SCENE_ENUM.START);
+  }
   onLoad() {
     // 绑定可以触发下一关的事件
     EventManager.instance.on(EVENT_ENUM.NEXT_LEVEL, this.nextLevel, this);
@@ -348,6 +362,8 @@ export class BattleManager extends Component {
     // 触发游戏记录和撤回事件
     EventManager.instance.on(EVENT_ENUM.RECORD, this.record, this);
     EventManager.instance.on(EVENT_ENUM.REVOKE, this.revoke, this);
+    EventManager.instance.on(EVENT_ENUM.RESTART, this.initStage, this);
+    EventManager.instance.on(EVENT_ENUM.OUT, this.outGame, this);
   }
 
   start() {
@@ -364,5 +380,7 @@ export class BattleManager extends Component {
     EventManager.instance.off(EVENT_ENUM.SHOW_SMOKE, this.generateSmoke, this);
     EventManager.instance.off(EVENT_ENUM.RECORD, this.record, this);
     EventManager.instance.off(EVENT_ENUM.REVOKE, this.revoke, this);
+    EventManager.instance.off(EVENT_ENUM.RESTART, this.initStage, this);
+    EventManager.instance.off(EVENT_ENUM.OUT, this.outGame, this);
   }
 }

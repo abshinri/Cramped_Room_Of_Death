@@ -10,4 +10,12 @@ export class MenuManager extends Component {
   handleUndo(event: Event, input: CONTROL_ENUM) {
     EventManager.instance.emit(EVENT_ENUM.REVOKE);
   }
+  // 重开
+  handleRestart(event: Event, input: CONTROL_ENUM) {
+    EventManager.instance.emit(EVENT_ENUM.RESTART);
+  }
+  // 退出
+  handleOut(event: Event, input: CONTROL_ENUM) {
+    EventManager.instance.emit(EVENT_ENUM.OUT);
+  }
 }

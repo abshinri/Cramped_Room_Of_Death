@@ -58,6 +58,10 @@ export enum EVENT_ENUM {
   RECORD = "RECORD",
   /** @member "撤销操作" */
   REVOKE = "REVOKE",
+  /** @member "重开" */
+  RESTART = "RESTART",
+  /** @member "退出" */
+  OUT = "OUT",
 }
 
 /**
@@ -334,4 +338,13 @@ export enum SCREEN_FADE_STATE_ENUM {
   FADE_IN = "FADE_IN",
   /** @member "渐出游戏画面" */
   FADE_OUT = "FADE_OUT",
+}
+
+export enum SCENE_ENUM {
+  /** @member "游戏场景" */
+  BATTLE = "Battle",
+  /** @member "开始场景" */
+  START = "Start",
+  /** @member "加载场景" */
+  LOADING = "Loading",
 }
