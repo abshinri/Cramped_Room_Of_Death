@@ -407,16 +407,17 @@ export class PlayerManager extends EntityManager {
     } else if (
       enemies.some(
         (enemy) =>
-          (enemy.x === weaponCurrPos.x && enemy.y === weaponCurrPos.y) ||
-          (enemy.x === weaponNextPos.x && enemy.y === weaponNextPos.y) ||
-          (enemy.x === weaponNextPos.x &&
-            enemy.y === weaponCurrPos.y &&
-            (this.direction === ENTITY_DIRECTION_ENUM.UP ||
-              this.direction === ENTITY_DIRECTION_ENUM.DOWN)) ||
-          (enemy.x === weaponCurrPos.x &&
-            enemy.y === weaponNextPos.y &&
-            (this.direction === ENTITY_DIRECTION_ENUM.LEFT ||
-              this.direction === ENTITY_DIRECTION_ENUM.RIGHT))
+          enemy.state !== ENTITY_STATE_ENUM.DEAD &&
+          ((enemy.x === weaponCurrPos.x && enemy.y === weaponCurrPos.y) ||
+            (enemy.x === weaponNextPos.x && enemy.y === weaponNextPos.y) ||
+            (enemy.x === weaponNextPos.x &&
+              enemy.y === weaponCurrPos.y &&
+              (this.direction === ENTITY_DIRECTION_ENUM.UP ||
+                this.direction === ENTITY_DIRECTION_ENUM.DOWN)) ||
+            (enemy.x === weaponCurrPos.x &&
+              enemy.y === weaponNextPos.y &&
+              (this.direction === ENTITY_DIRECTION_ENUM.LEFT ||
+                this.direction === ENTITY_DIRECTION_ENUM.RIGHT)))
       )
     ) {
       // 敌人
