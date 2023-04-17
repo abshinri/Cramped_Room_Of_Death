@@ -35,7 +35,11 @@ export class SpikesManager extends Component {
    *
    */
   set count(value: number) {
-    if (this._count === value) return;
+    if (this._count === value) {
+      return;
+    } else if (value > this._totalCount) { // 玩家快速移动时, 尖刺状态计数可能会超过尖刺类型, 所以需要取余
+      value = value - this._totalCount;
+    }
     this._count = value;
     this.fsm.setParams(FSM_PARAMS_NAME_ENUM.SPIKES_CUR_COUNT, value);
   }

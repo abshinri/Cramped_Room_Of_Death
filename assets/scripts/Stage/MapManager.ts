@@ -28,7 +28,7 @@ export class MapManager extends Component {
   centerTileMap() {
     const { mapRowCount, mapCol } = DataManager.instance;
     const x = -(mapCol * 55) / 2;
-    const y = (mapRowCount * 55) / 2 + 120;
+    const y = (mapRowCount * 55) / 2 + 100;
 
     // 初始化地图的时候确保画面没有在震动
     const shakeManager = this.node.getComponent(ShakeManager);

@@ -199,7 +199,7 @@ export class PlayerManager extends EntityManager {
       /** 向下移动 */
       const moveVec = new Vec2(0, 1);
       playerNextPos.add(moveVec);
-      if (playerNextPos.y > tiles[0]?.length) {
+      if (playerNextPos.y > tiles[x]?.length) {
         Utils.info("willBlock", "下方超出地图边界, 无法移动");
         return true; // 下方超出地图边界, 无法移动
       }
@@ -269,10 +269,10 @@ export class PlayerManager extends EntityManager {
       /** 判断是否能移动到目标位置, 不能则播放撞墙动画 */
       const canMove = this.canMoveToTargetByPos(playerNextPos, weaponNextPos);
       if (canMove) {
-        Utils.info("willBlock", "无法移动到目标");
         return false;
       } else {
         this.state = ENTITY_DIRECTION_TO_BLOCK_ENUM[this.direction];
+        Utils.info("willBlock", "无法移动到目标");
         return true;
       }
     } else if (
@@ -283,10 +283,10 @@ export class PlayerManager extends EntityManager {
       /** 判断是否能转向到目标位置, 不能则播放撞墙动画 */
       const canTurn = this.canTurnToTargetByPos(weaponCurrPos, weaponNextPos);
       if (canTurn) {
-        Utils.info("willBlock", "无法转向到目标");
         return false;
       } else {
         this.state = ENTITY_DIRECTION_TO_BLOCK_ENUM[input];
+        Utils.info("willBlock", "无法转向到目标");
         return true;
       }
     }
@@ -342,7 +342,7 @@ export class PlayerManager extends EntityManager {
         this.haveEntityByPos(weaponNextPos, door))
     ) {
       // 门
-      Utils.info("canMoveToTargetByPos-false 门");
+      Utils.info("canMoveToTargetByPos 移动路径存在门");
       return false;
     } else if (
       enemies &&
@@ -350,7 +350,7 @@ export class PlayerManager extends EntityManager {
         enemies.some((enemy) => this.haveEntityByPos(weaponNextPos, enemy)))
     ) {
       // 敌人
-      Utils.info("canMoveToTargetByPos-false 敌人");
+      Utils.info("canMoveToTargetByPos 移动路径存在敌人");
       return false;
     } else if (
       !(
@@ -371,7 +371,7 @@ export class PlayerManager extends EntityManager {
         return true;
       } else {
         // 有墙和悬崖
-        Utils.info("canMoveToTargetByPos-false 有墙和悬崖");
+        Utils.info("canMoveToTargetByPos-false 移动路径存在墙和悬崖");
         return false;
       }
     } else {
@@ -402,6 +402,7 @@ export class PlayerManager extends EntityManager {
           this.direction === ENTITY_DIRECTION_ENUM.RIGHT))
     ) {
       // 门
+      Utils.info("canTurnToTargetByPos", "旋转路径存在门");
       return false;
     } else if (
       enemies.some(
@@ -419,9 +420,11 @@ export class PlayerManager extends EntityManager {
       )
     ) {
       // 敌人
+      Utils.info("canTurnToTargetByPos", "旋转路径存在敌人");
       return false;
     } else if (!this.checkWallTurnableByPos(weaponCurrPos, weaponNextPos)) {
       // 检测结果为不能转动, 因为玩家的前方,侧前方,侧方有墙
+      Utils.info("canTurnToTargetByPos", "旋转路径存在墙");
       return false;
     } else {
       return true;
@@ -455,8 +458,10 @@ export class PlayerManager extends EntityManager {
         DataManager.instance.tiles[weaponCurrPos.x][weaponNextPos.y]
       );
     }
-
-    return checkBlocks.every((block) => block && block.turnable);
+    // 补充地图砖块为null的情况
+    return checkBlocks.every(
+      (block) => block == null || (block && block.turnable)
+    );
   }
 
   // 控制角色移动

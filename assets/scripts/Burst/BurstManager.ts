@@ -36,10 +36,9 @@ export class BurstManager extends EntityManager {
     if (this.state === ENTITY_STATE_ENUM.DEAD) return;
     if (!DataManager.instance.player) return;
 
-    // 玩家每次结束移动, 改变敌人的朝向, 其实始终对着玩家
     const {
-      x: playerX,
-      y: playerY,
+      realX: playerX,
+      realY: playerY,
       state: playerState,
     } = DataManager.instance.player;
 

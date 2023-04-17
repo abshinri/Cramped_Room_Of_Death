@@ -1,7 +1,5 @@
 import { _decorator, Component, director, Event, Node } from "cc";
-import { CONTROL_ENUM, EVENT_ENUM, SCENE_ENUM } from "../../enums";
-import EventManager from "../../runtime/EventManager";
-import Utils from "../Utils";
+import { SCENE_ENUM } from "../../enums";
 import FaderManager from "../../runtime/FaderManager";
 const { ccclass, property } = _decorator;
 

@@ -1,9 +1,6 @@
 import { _decorator } from "cc";
 import { EnemyManager } from "../../base/EnemyManager";
-import {
-  EVENT_ENUM,
-  ENTITY_STATE_ENUM,
-} from "../../enums";
+import { EVENT_ENUM, ENTITY_STATE_ENUM } from "../../enums";
 import DataManager from "../../runtime/DataManager";
 import EventManager from "../../runtime/EventManager";
 import { WoodenSkeletonStateMachine } from "./WoodenSkeletonStateMachine";
@@ -36,8 +33,8 @@ export class WoodenSkeletonManager extends EnemyManager {
 
     // 玩家每次结束移动, 改变敌人的朝向, 其实始终对着玩家
     const {
-      x: playerX,
-      y: playerY,
+      realX: playerX,
+      realY: playerY,
       state: playerState,
     } = DataManager.instance.player;
 

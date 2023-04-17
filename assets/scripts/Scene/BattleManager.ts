@@ -58,6 +58,7 @@ export class BattleManager extends Component {
   nextLevel() {
     this.clearLevel();
     DataManager.instance.levelIndex = DataManager.instance.levelIndex + 1;
+    DataManager.instance.saveGameProgress();
     this.initStage();
   }
 
@@ -214,8 +215,8 @@ export class BattleManager extends Component {
     this.level = level;
 
     DataManager.instance.map = level.map;
-    DataManager.instance.mapRowCount = level.map.length || 0;
-    DataManager.instance.mapCol = level.map[0].length || 0;
+    DataManager.instance.mapRowCount = level.map[0].length || 0;
+    DataManager.instance.mapCol = level.map.length || 0;
 
     await this.generateTileMap();
     await this.generateEnemy();
@@ -348,6 +349,15 @@ export class BattleManager extends Component {
       }
     }
   }
+  /**
+   * 关卡重置
+   */
+  async reset() {
+    this.inited = false;
+    await FaderManager.instance.fadeOut();
+    this.clearLevel();
+    this.initStage();
+  }
   // 退出游戏
   async outGame() {
     await FaderManager.instance.fadeOut();
@@ -362,11 +372,12 @@ export class BattleManager extends Component {
     // 触发游戏记录和撤回事件
     EventManager.instance.on(EVENT_ENUM.RECORD, this.record, this);
     EventManager.instance.on(EVENT_ENUM.REVOKE, this.revoke, this);
-    EventManager.instance.on(EVENT_ENUM.RESTART, this.initStage, this);
+    EventManager.instance.on(EVENT_ENUM.RESTART, this.reset, this);
     EventManager.instance.on(EVENT_ENUM.OUT, this.outGame, this);
   }
 
   start() {
+    DataManager.instance.loadGameProgress();
     this.initStage();
   }
 

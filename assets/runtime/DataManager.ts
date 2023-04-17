@@ -1,3 +1,4 @@
+import { sys } from "cc";
 import Singleton from "../base/Singleton";
 import { IRecord, ITile } from "../interfaces";
 import { BurstManager } from "../scripts/Burst/BurstManager";
@@ -98,13 +99,12 @@ export default class DataManager extends Singleton {
    */
   smokes: Array<SmokeManager> = [];
 
-
   /**
    * 当前关卡的记录信息
    *
    * @type {Array<IRecord>}
    */
-  record:Array<IRecord> = []
+  record: Array<IRecord> = [];
   /**
    * 重置数据
    *
@@ -121,5 +121,23 @@ export default class DataManager extends Singleton {
     this.spikes = [];
     this.smokes = [];
     this.record = [];
+  }
+  // 保存当前游戏进度到本地
+  saveGameProgress() {
+    let progress = {
+      levelIndex: this.levelIndex,
+    };
+    sys.localStorage.setItem("progress", JSON.stringify(progress));
+  }
+  // 从本地读取游戏进度
+  loadGameProgress() {
+    this.reset();
+    let progress = sys.localStorage.getItem("progress");
+    if (progress) {
+      let data = JSON.parse(progress);
+      this.levelIndex = data.levelIndex;
+    } else {
+      this.levelIndex = 1;
+    }
   }
 }
